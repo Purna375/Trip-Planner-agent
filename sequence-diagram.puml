@@ -1,0 +1,338 @@
+@startuml AI Trip Planner - Complete Sequence Flow
+
+title AI Trip Planner - Detailed Execution Flow (Fast Mode)
+
+actor User
+participant "Browser\n(index.html)" as Browser
+participant "app.js\n(Frontend Logic)" as AppJS
+participant "api.js\n(API Client)" as ApiJS
+participant "FastAPI\n(main.py)" as FastAPI
+participant "trip_planner.py\n(Routes)" as Routes
+participant "trip_service.py\n(Business Logic)" as TripService
+participant "api_service.py\n(External APIs)" as APIService
+participant "OpenStreetMap\nNominatim" as OSM
+participant "Open-Meteo\nWeather API" as Weather
+participant "Overpass API\n(POI)" as Overpass
+participant "Groq API\n(LLM)" as Groq
+
+== User Input Phase ==
+User -> Browser: Fill trip form\n(destination, dates, budget, etc.)
+User -> Browser: Click "Generate Itinerary"
+Browser -> AppJS: submitEvent
+activate AppJS
+
+AppJS -> AppJS: handleFormSubmit(e)
+AppJS -> AppJS: e.preventDefault()
+AppJS -> AppJS: getFormData()
+note right
+  Collect:
+  - destination
+  - start_date
+  - end_date
+  - budget
+  - travelers
+  - interests[]
+  - pace
+end note
+
+AppJS -> AppJS: validateFormData()
+note right
+  Validate:
+  - Required fields
+  - Date logic
+  - Budget minimum
+end note
+
+== UI State Change ==
+AppJS -> AppJS: showSection('loading')
+AppJS -> Browser: Display loading screen
+Browser -> User: Show loading animation\n+ progress bar
+AppJS -> AppJS: animateLoadingSteps()
+
+== API Request ==
+AppJS -> ApiJS: apiClient.planTrip(formData)
+activate ApiJS
+
+ApiJS -> FastAPI: POST /api/plan-trip\n+ JSON body
+note right
+  Request Body:
+  {
+    "destination": "London",
+    "start_date": "2026-02-21",
+    "end_date": "2026-02-28",
+    "budget": 2000,
+    "travelers": 2,
+    "interests": ["culture", "food"],
+    "pace": "balanced"
+  }
+end note
+activate FastAPI
+
+== Backend Processing ==
+FastAPI -> Routes: POST /api/plan-trip endpoint
+activate Routes
+
+Routes -> Routes: Validate CORS
+Routes -> Routes: Parse request body
+Routes -> Routes: Pydantic validation
+Routes -> TripService: plan_trip(request: TripRequest)
+activate TripService
+
+TripService -> TripService: plan_trip_fast(request)
+note right
+  Fast Mode is the ONLY mode
+  (no mode selection in request)
+end note
+
+== Step 1: Calculate Trip Metrics ==
+TripService -> TripService: calculate_trip_duration()
+note right: duration = 8 days
+TripService -> TripService: calculate_daily_budget()
+note right: daily_budget = $250/day
+TripService -> TripService: get_date_range()
+note right: ["2026-02-21", ..., "2026-02-28"]
+
+== Step 2: Geocoding (No AI) ==
+TripService -> APIService: get_coordinates("London")
+activate APIService
+
+APIService -> OSM: GET /search?q=London&format=json
+activate OSM
+OSM --> APIService: [{"lat": 51.5074, "lon": -0.1278, ...}]
+deactivate OSM
+
+APIService --> TripService: {lat: 51.5074, lon: -0.1278, display_name: "..."}
+deactivate APIService
+
+== Step 3: Weather Forecast (No AI) ==
+TripService -> APIService: get_weather_forecast(lat, lon, dates)
+activate APIService
+
+APIService -> Weather: GET /v1/forecast?\nlat=51.5074&lon=-0.1278\n&start_date=2026-02-21\n&end_date=2026-02-28
+activate Weather
+Weather --> APIService: Daily forecast data\n(temp, precipitation, weathercode)
+deactivate Weather
+
+APIService --> TripService: {daily: {time: [...], temp_max: [...], ...}}
+deactivate APIService
+
+== Step 4: Points of Interest (No AI) ==
+TripService -> APIService: get_points_of_interest(lat, lon, radius, interests)
+activate APIService
+
+APIService -> Overpass: POST /api/interpreter\n(Overpass QL query)
+note right
+  Query for:
+  - Museums
+  - Restaurants
+  - Tourist attractions
+  - Cultural sites
+  Based on user interests
+end note
+activate Overpass
+Overpass --> APIService: POI list with details\n(name, type, coordinates)
+deactivate Overpass
+
+APIService --> TripService: [{name: "...", type: "...", lat: ..., lon: ...}, ...]
+deactivate APIService
+
+== Step 5: Format Data for LLM ==
+TripService -> TripService: _format_weather_summary(weather_data)
+note right
+  Convert raw weather data
+  into readable summary:
+  "Day 1: 12°C, Partly cloudy"
+end note
+
+TripService -> TripService: _format_pois_list(pois)
+note right
+  Convert POI array
+  into formatted list:
+  "1. British Museum (museum)"
+  "2. Tower of London (castle)"
+end note
+
+== Step 6: Single LLM Call (ONLY AI Call) ==
+TripService -> TripService: Initialize ChatGroq LLM
+note right
+  Configuration:
+  - Model: llama-3.1-8b-instant
+  - Temperature: 0.7
+  - Response format: JSON mode
+end note
+
+TripService -> TripService: Build comprehensive prompt
+note right
+  Prompt includes:
+  - Trip details (destination, dates, budget)
+  - Calculated metrics (duration, daily_budget)
+  - Weather forecast (formatted)
+  - Available POIs (formatted)
+  - User preferences (interests, pace)
+  - JSON schema for response
+end note
+
+TripService -> Groq: POST /openai/v1/chat/completions
+activate Groq
+note right
+  Model: llama-3.1-8b-instant
+  Temperature: 0.7
+  Response Format: JSON
+  
+  Prompt: ~3000 tokens
+  
+  Request: Create 8-day itinerary
+  with morning/afternoon/evening
+  activities, staying within budget
+end note
+
+Groq -> Groq: Process prompt\n(LLM inference)
+Groq -> Groq: Generate structured itinerary
+Groq -> Groq: Format as valid JSON
+
+Groq --> TripService: JSON response
+note left
+  Response structure:
+  {
+    "destination_info": {...},
+    "daily_itineraries": [
+      {
+        "day": 1,
+        "activities": [
+          {"time_of_day": "morning", ...}
+        ]
+      }
+    ],
+    "recommendations": {...}
+  }
+end note
+deactivate Groq
+
+== Step 7: Parse and Validate LLM Response ==
+TripService -> TripService: Extract JSON from response
+note right
+  - Remove markdown code blocks
+  - Clean trailing commas (regex)
+  - Parse JSON
+end note
+
+alt JSON Parse Success
+    TripService -> TripService: json.loads(response_text)
+else JSON Parse Error
+    TripService -> Groq: Self-healing request\n"Fix this invalid JSON"
+    Groq --> TripService: Corrected JSON
+    TripService -> TripService: json.loads(fixed_text)
+end
+
+== Step 8: Format Final Response ==
+TripService -> TripService: _format_response()
+note right
+  Convert agent_response to
+  TripResponse Pydantic model:
+  
+  - TripOverview
+  - List[DayItinerary]
+    - morning: Activity
+    - afternoon: Activity
+    - evening: Activity
+  - SmartAdditions
+end note
+
+TripService -> TripService: Build TripOverview
+TripService -> TripService: Build daily itineraries
+TripService -> TripService: Calculate travel times
+TripService -> TripService: Build SmartAdditions
+
+TripService --> Routes: TripResponse (Pydantic model)
+deactivate TripService
+
+== API Response ==
+Routes -> Routes: Serialize to JSON
+Routes --> FastAPI: JSON response (200 OK)
+deactivate Routes
+
+FastAPI --> ApiJS: HTTP 200 OK + JSON body
+deactivate FastAPI
+
+note right
+  Response size: ~15-30KB
+  Total backend time: 5-10 seconds
+  LLM calls: 1
+end note
+
+== Frontend Display ==
+ApiJS --> AppJS: response object
+deactivate ApiJS
+
+AppJS -> AppJS: appState.currentTrip = response
+AppJS -> AppJS: progressBar.style.width = '100%'
+AppJS -> AppJS: displayResults(response)
+
+AppJS -> AppJS: displayOverview()
+note right
+  Display:
+  - Destination
+  - Duration
+  - Budget
+  - Weather summary
+  (NO EMOJIS)
+end note
+
+AppJS -> AppJS: displayItinerary()
+note right
+  For each day:
+  - Day header
+  - Morning activity
+  - Afternoon activity
+  - Evening activity
+  - Daily cost
+  (Professional card layout)
+end note
+
+AppJS -> AppJS: displaySmartAdditions()
+note right
+  Display:
+  - Packing list
+  - Weather tips
+  - Alternate activities
+  - Local tips
+end note
+
+AppJS -> AppJS: showSection('results')
+AppJS -> Browser: Update DOM with results
+deactivate AppJS
+
+Browser -> User: Display complete itinerary
+
+== Optional: PDF Download ==
+User -> Browser: Click "Download PDF"
+Browser -> AppJS: downloadButton.click
+activate AppJS
+
+AppJS -> AppJS: downloadItinerary()
+AppJS -> AppJS: Initialize jsPDF
+AppJS -> AppJS: Add title & overview
+AppJS -> AppJS: Add daily itineraries\n(loop through days)
+AppJS -> AppJS: Add recommendations
+AppJS -> AppJS: Generate PDF file
+
+AppJS -> Browser: Trigger download
+Browser -> User: Save PDF file
+deactivate AppJS
+
+note over User, Groq
+  **Performance Summary:**
+  
+  Total Time: 5-10 seconds
+  API Calls: 4 (1 geocoding + 1 weather + 1 POI + 1 LLM)
+  LLM Calls: 1 (vs 5-8 in agent mode)
+  Cost per request: ~$0.001
+  
+  **Technology Stack:**
+  - Frontend: Vanilla JS, jsPDF, CSS Variables
+  - Backend: FastAPI (Python 3.11+)
+  - AI: LangChain + Groq (llama-3.1-8b-instant)
+  - APIs: OSM, Open-Meteo, Overpass
+end note
+
+@enduml

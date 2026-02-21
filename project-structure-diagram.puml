@@ -1,0 +1,364 @@
+@startuml AI Trip Planner - Project Structure
+
+title AI Trip Planner - Complete Project Structure
+
+skinparam componentStyle rectangle
+
+package "trip-agent/" {
+    
+    package "frontend/" <<Folder>> #E3F2FD {
+        [index.html] as FrontendHTML
+        [index_old.html] as OldHTML
+        
+        package "css/" {
+            [styles.css] as StylesCSS
+            [styles_old.css] as OldCSS
+        }
+        
+        package "js/" {
+            [app.js] as AppJS
+            [api.js] as ApiJS
+        }
+    }
+    
+    package "backend/" <<Folder>> #FFF3E0 {
+        [main.py] as MainPy
+        [requirements.txt] as ReqTxt
+        [.env] as EnvFile
+        
+        package "routes/" {
+            [trip_planner.py] as RoutesPy
+        }
+        
+        package "services/" {
+            [trip_service.py] as ServicePy
+            [api_service.py] as ApiServicePy
+            [agent_service.py] as AgentPy
+        }
+        
+        package "models/" {
+            [schemas.py] as SchemasPy
+        }
+        
+        package "utils/" {
+            [calculations.py] as CalcPy
+            [config.py] as ConfigPy
+        }
+    }
+    
+    package "Documentation/" <<Folder>> #FFF9C4 {
+        [architecture-diagram.puml] as ArchDiagram
+        [sequence-diagram.puml] as SeqDiagram
+        [data-models-diagram.puml] as ModelsDiagram
+        [project-structure-diagram.puml] as StructDiagram
+        [DIAGRAMS-README.md] as DiagramsReadme
+    }
+}
+
+note right of FrontendHTML
+    **index.html** (~250 lines)
+    
+    Professional UI Structure:
+    - Trip form with validation
+    - Loading screen + progress bar
+    - Results display
+    - Error handling
+    - NO mode selection
+    - NO emojis
+    
+    Components:
+    - Header (TripPlanner brand)
+    - Form sections
+    - Loading animation
+    - Results cards
+    - Action buttons
+end note
+
+note right of StylesCSS
+    **styles.css** (~800 lines)
+    
+    Modern Design System:
+    - CSS variables
+    - Professional color palette
+    - Inter font family
+    - Card-based layouts
+    - Responsive grid
+    - Smooth transitions
+    - NO emoji characters
+    
+    Components:
+    - Form fields & inputs
+    - Chips (interests)
+    - Buttons
+    - Cards (day, activity)
+    - Loading spinner
+    - Progress bar
+end note
+
+note right of AppJS
+    **app.js** (~550 lines)
+    
+    Main Application Logic:
+    
+    State Management:
+    - currentTrip
+    - isLoading
+    
+    Event Handlers:
+    - handleFormSubmit()
+    - planAnotherButton
+    - downloadButton
+    
+    Core Functions:
+    - getFormData()
+    - validateFormData()
+    - displayResults()
+    - displayOverview()
+    - displayItinerary()
+    - renderActivity()
+    - displaySmartAdditions()
+    - downloadItinerary() → PDF
+    - showSection()
+    - animateLoadingSteps()
+end note
+
+note right of ApiJS
+    **api.js** (~100 lines)
+    
+    API Communication:
+    
+    Class: APIClient
+    
+    Methods:
+    - request(endpoint, options)
+    - get(endpoint)
+    - post(endpoint, data)
+    - planTrip(tripData)
+    - checkHealth()
+    
+    Base URL:
+    http://localhost:8000
+end note
+
+note left of MainPy
+    **main.py** (~50 lines)
+    
+    FastAPI Application Entry:
+    
+    - FastAPI() initialization
+    - CORS middleware
+    - Include routers
+    - Lifespan events
+    - Uvicorn server
+    - Port: 8000
+end note
+
+note left of RoutesPy
+    **trip_planner.py** (~80 lines)
+    
+    API Endpoints:
+    
+    POST /api/plan-trip
+    - Validate TripRequest
+    - Call trip_service.plan_trip()
+    - Return TripResponse
+    - Error handling
+    
+    GET /api/health
+    - Health check endpoint
+end note
+
+note left of ServicePy
+    **trip_service.py** (~600 lines)
+    
+    Core Business Logic:
+    
+    Class: TripService
+    
+    Main Methods:
+    - plan_trip() → routes to fast mode
+    - plan_trip_fast() → 1 AI call
+    - plan_trip_agent() → unused
+    
+    Helper Methods:
+    - _format_response()
+    - _format_weather_summary()
+    - _format_pois_list()
+    - _generate_weather_summary()
+    
+    Fast Mode Flow:
+    1. Calculate metrics
+    2. Get coordinates (OSM)
+    3. Get weather (Open-Meteo)
+    4. Get POIs (Overpass)
+    5. Single LLM call (Groq)
+    6. Parse & validate JSON
+    7. Format response
+    
+    Performance:
+    - Response time: 5-10 seconds
+    - LLM calls: 1 (vs 5-8)
+    - Cost: ~$0.001/request
+    - Success rate: 99%+
+end note
+
+note left of ApiServicePy
+    **api_service.py** (~350 lines)
+    
+    External API Integration:
+    
+    Class: ExternalAPIService
+    
+    Methods:
+    - get_coordinates() → OSM
+    - get_weather_forecast() → Open-Meteo
+    - get_points_of_interest() → Overpass  
+    - get_route_info() → OpenRouteService
+    
+    Uses httpx async client
+end note
+
+note left of AgentPy
+    **agent_service.py** (~400 lines)
+    
+    LangChain Agent (Unused):
+    
+    - ReAct pattern with tools
+    - 5-8 LLM calls per request
+    - Kept for reference only
+end note
+
+note left of SchemasPy
+    **schemas.py** (~150 lines)
+    
+    Pydantic Models:
+    
+    Request:
+    - TripRequest
+      (NO mode field)
+    
+    Response:
+    - TripResponse
+    - TripOverview
+    - DayItinerary
+    - Activity
+    - SmartAdditions
+end note
+
+note left of CalcPy
+    **calculations.py** (~80 lines)
+    
+    Helper Functions:
+    
+    - calculate_trip_duration()
+    - calculate_daily_budget()
+    - get_date_range()
+    - format_currency()
+end note
+
+note left of ConfigPy
+    **config.py** (~50 lines)
+    
+    Settings Management:
+    
+    Class: Settings (Pydantic)
+    
+    - groq_api_key
+    - llm_model
+    - environment variables
+    
+    Uses python-dotenv
+end note
+
+note bottom of ReqTxt
+    **requirements.txt**
+    
+    fastapi==0.115.12
+    uvicorn==0.34.0
+    pydantic==2.10.5
+    langchain==0.3.14
+    langchain-groq==0.2.2
+    httpx==0.28.1
+    python-dotenv==1.0.1
+end note
+
+note bottom of EnvFile
+    **.env**
+    
+    GROQ_API_KEY=your_key_here
+    LLM_MODEL=llama-3.1-8b-instant
+end note
+
+note right of ArchDiagram
+    **architecture-diagram.puml**
+    
+    Component diagram showing:
+    - Frontend layer
+    - Backend layer
+    - External APIs
+    - AI layer
+    - Data flow
+end note
+
+note right of SeqDiagram
+    **sequence-diagram.puml**
+    
+    Detailed sequence showing:
+    - User input phase
+    - API request
+    - Backend processing
+    - 4 external API calls
+    - Single LLM call
+    - Response formatting
+    - Frontend display
+    - PDF download
+    
+    ~500 lines
+end note
+
+note right of ModelsDiagram
+    **data-models-diagram.puml**
+    
+    Data model diagram:
+    - Request models
+    - Response models
+    - External API data
+    - Relationships
+end note
+
+note bottom of "trip-agent/"
+    **Technology Stack Summary:**
+    
+    Frontend:
+    - Vanilla JavaScript (no framework)
+    - Modern CSS (variables, grid, flexbox)
+    - jsPDF for PDF generation
+    - Inter font (Google Fonts)
+    - Professional design system (no emojis)
+    
+    Backend:
+    - Python 3.11+
+    - FastAPI (async)
+    - Pydantic validation
+    - LangChain integration
+    
+    AI:
+    - Groq API
+    - llama-3.1-8b-instant
+    - JSON mode enabled
+    
+    External APIs:
+    - OpenStreetMap (geocoding)
+    - Open-Meteo (weather)
+    - Overpass (POIs)
+    - OpenRouteService (routing)
+    
+    **Project Stats:**
+    - Frontend: ~650 lines JS
+    - Backend: ~1,200 lines Python
+    - CSS: ~800 lines
+    - HTML: ~250 lines
+    - Total: ~2,900 lines
+end note
+
+@enduml

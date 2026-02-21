@@ -1,0 +1,168 @@
+@startuml AI Trip Planner - Data Models
+
+title AI Trip Planner - Data Models & Schemas
+
+!define REQUEST_COLOR #FFE0B2
+!define RESPONSE_COLOR #C8E6C9
+!define NESTED_COLOR #B3E5FC
+
+package "Request Models" REQUEST_COLOR {
+    class TripRequest {
+        + destination: str
+        + start_date: date
+        + end_date: date
+        + budget: float
+        + travelers: int
+        + interests: List[str]
+        + pace: str
+        --
+        Validation:
+        - budget >= 100
+        - travelers >= 1
+        - interests in allowed list
+        - pace in [relaxed, balanced, packed]
+    }
+    
+    note right of TripRequest
+        **Removed Fields:**
+        - mode (fast is now default)
+        
+        **Allowed Interests:**
+        - culture, history, food
+        - nature, adventure
+        - museums, art
+        - shopping, nightlife
+        - local_life
+    end note
+}
+
+package "Response Models" RESPONSE_COLOR {
+    class TripResponse {
+        + overview: TripOverview
+        + itinerary: List[DayItinerary]
+        + smart_additions: SmartAdditions
+    }
+    
+    class TripOverview {
+        + destination: str
+        + duration: int
+        + start_date: date
+        + end_date: date
+        + total_budget: float
+        + daily_budget: float
+        + travelers: int
+        + weather_summary: str
+        + coordinates: Dict[str, float]
+    }
+    
+    class DayItinerary {
+        + day: int
+        + date: date
+        + morning: Activity
+        + afternoon: Activity
+        + evening: Activity
+        + weather: str
+        + travel_time: str
+        + total_cost: float
+        + notes: Optional[str]
+    }
+    
+    class Activity {
+        + name: str
+        + description: str
+        + duration: str
+        + estimated_cost: float
+        + location: Optional[str]
+        + category: Optional[str]
+    }
+    
+    class SmartAdditions {
+        + packing_list: List[str]
+        + weather_tips: List[str]
+        + alternate_activities: List[str]
+        + local_tips: List[str]
+    }
+}
+
+package "External API Data" NESTED_COLOR {
+    class GeocodeData {
+        + lat: float
+        + lon: float
+        + display_name: str
+        + importance: float
+    }
+    
+    class WeatherData {
+        + daily: Dict
+          - time: List[str]
+          - temperature_2m_max: List[float]
+          - temperature_2m_min: List[float]
+          - precipitation_sum: List[float]
+          - weathercode: List[int]
+        + timezone: str
+    }
+    
+    class POIData {
+        + id: int
+        + type: str
+        + tags: Dict
+          - name: str
+          - tourism: str
+          - amenity: str
+        + lat: float
+        + lon: float
+    }
+    
+    class RouteData {
+        + distance: float
+        + duration: float
+        + geometry: str
+    }
+}
+
+' Relationships
+TripResponse *-- TripOverview : contains
+TripResponse *-- "1..*" DayItinerary : contains
+TripResponse *-- SmartAdditions : contains
+DayItinerary *-- "3" Activity : morning/afternoon/evening
+
+TripRequest ..> TripResponse : produces (via API)
+
+note bottom of Activity
+    **Activity Examples:**
+    
+    Morning:
+    - Visit British Museum
+    - Walking tour of historic sites
+    - Breakfast at local cafe
+    
+    Afternoon:
+    - River Thames cruise
+    - Shopping at Covent Garden
+    - Lunch at traditional pub
+    
+    Evening:
+    - West End theater show
+    - Dinner at restaurant
+    - Nightlife exploration
+end note
+
+note bottom of SmartAdditions
+    **AI-Generated Recommendations:**
+    
+    Packing List:
+    - Weather-appropriate clothing
+    - Travel documents
+    - Comfort items
+    
+    Weather Tips:
+    - Best times to visit outdoor sites
+    - Indoor backup plans
+    
+    Local Tips:
+    - Transportation advice
+    - Cultural customs
+    - Money-saving tips
+end note
+
+@enduml

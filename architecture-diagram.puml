@@ -1,0 +1,216 @@
+@startuml AI Trip Planner - Complete Architecture
+
+title AI Trip Planner - Complete Internal Architecture & Data Flow
+
+!define FRONTEND_COLOR #E3F2FD
+!define BACKEND_COLOR #FFF3E0
+!define EXTERNAL_COLOR #F3E5F5
+!define LLM_COLOR #E8F5E9
+!define DATABASE_COLOR #FFF9C4
+
+' Component Definitions
+package "Frontend Layer" FRONTEND_COLOR {
+    component "index.html" as HTML {
+        [Trip Form]
+        [Loading UI]
+        [Results Display]
+        [PDF Download]
+    }
+    
+    component "app.js" as AppJS {
+        [Form Handler]
+        [State Manager]
+        [Display Controller]
+        [PDF Generator]
+    }
+    
+    component "api.js" as ApiJS {
+        [API Client]
+        [HTTP Wrapper]
+    }
+    
+    component "styles.css" as CSS {
+        [Professional Design]
+        [Responsive Layout]
+        [Components]
+    }
+}
+
+package "Backend Layer (FastAPI)" BACKEND_COLOR {
+    component "main.py" as Main {
+        [FastAPI App]
+        [CORS Config]
+    }
+    
+    component "routes/trip_planner.py" as Routes {
+        [POST /api/plan-trip]
+        [GET /api/health]
+        [Request Validation]
+    }
+    
+    component "services/trip_service.py" as TripService {
+        [plan_trip()]
+        [plan_trip_fast()]
+        [_format_response()]
+        [_format_weather_summary()]
+        [_format_pois_list()]
+    }
+    
+    component "services/api_service.py" as APIService {
+        [get_coordinates()]
+        [get_weather_forecast()]
+        [get_points_of_interest()]
+        [get_route_info()]
+    }
+    
+    component "models/schemas.py" as Schemas {
+        [TripRequest]
+        [TripResponse]
+        [DayItinerary]
+        [Activity]
+    }
+    
+    component "utils/calculations.py" as Utils {
+        [calculate_duration()]
+        [calculate_daily_budget()]
+        [get_date_range()]
+    }
+    
+    component "utils/config.py" as Config {
+        [Settings]
+        [Environment Variables]
+        [API Keys]
+    }
+}
+
+package "External APIs" EXTERNAL_COLOR {
+    database "OpenStreetMap\nNominatim" as OSM {
+        [Geocoding Service]
+    }
+    
+    database "Open-Meteo" as Weather {
+        [Weather Forecast API]
+    }
+    
+    database "Overpass API" as Overpass {
+        [POI Search]
+        [Tourism Data]
+    }
+    
+    database "OpenRouteService" as ORS {
+        [Routing Service]
+        [Travel Time]
+    }
+}
+
+package "AI Layer (Groq)" LLM_COLOR {
+    cloud "Groq API" as Groq {
+        [llama-3.1-8b-instant]
+        [JSON Mode]
+        [Chat Completions]
+    }
+    
+    component "LangChain" as LangChain {
+        [ChatGroq]
+        [LLM Interface]
+    }
+}
+
+' Relationships
+[Trip Form] --> [Form Handler] : User Input
+[Form Handler] --> [API Client] : Form Data
+[API Client] -down-> [POST /api/plan-trip] : HTTP POST
+[POST /api/plan-trip] --> [Request Validation] : Validate
+[Request Validation] --> [TripRequest] : Pydantic Model
+[TripRequest] --> [plan_trip()] : Validated Request
+[plan_trip()] --> [plan_trip_fast()] : Fast Mode Only
+
+[plan_trip_fast()] --> [calculate_duration()] : Date Calculations
+[plan_trip_fast()] --> [calculate_daily_budget()] : Budget Calculations
+[plan_trip_fast()] --> [get_date_range()] : Date Array
+
+[plan_trip_fast()] --> [get_coordinates()] : Step 1: Location
+[get_coordinates()] --> [Geocoding Service] : Query Location
+[Geocoding Service] --> [get_coordinates()] : {lat, lon, name}
+
+[plan_trip_fast()] --> [get_weather_forecast()] : Step 2: Weather
+[get_weather_forecast()] --> [Weather Forecast API] : Coordinates + Dates
+[Weather Forecast API] --> [get_weather_forecast()] : Daily Forecast
+
+[plan_trip_fast()] --> [get_points_of_interest()] : Step 3: POIs
+[get_points_of_interest()] --> [POI Search] : Coordinates + Interests
+[POI Search] --> [get_points_of_interest()] : Attractions List
+
+[plan_trip_fast()] --> [_format_weather_summary()] : Format Data
+[plan_trip_fast()] --> [_format_pois_list()] : Format Data
+
+[plan_trip_fast()] --> [ChatGroq] : Step 4: Single LLM Call
+[ChatGroq] --> [Chat Completions] : Comprehensive Prompt
+[Chat Completions] --> [ChatGroq] : JSON Response
+[ChatGroq] --> [plan_trip_fast()] : Structured Itinerary
+
+[plan_trip_fast()] --> [_format_response()] : Agent Response
+[_format_response()] --> [TripResponse] : Build Response
+[TripResponse] --> [POST /api/plan-trip] : JSON Response
+[POST /api/plan-trip] --> [API Client] : HTTP 200
+
+[API Client] --> [Display Controller] : Trip Data
+[Display Controller] --> [Results Display] : Update DOM
+[PDF Generator] --> [PDF Download] : jsPDF
+
+note right of [plan_trip_fast()]
+  **FAST MODE (1 AI Call)**
+  
+  1. Direct API calls (no AI):
+     - Geocoding
+     - Weather data
+     - POI search
+  
+  2. Single LLM formatting call:
+     - Receives all raw data
+     - Creates day-by-day itinerary
+     - Returns structured JSON
+  
+  Total Time: 5-10 seconds
+  LLM Calls: 1
+end note
+
+note right of [ChatGroq]
+  **LLM Configuration**
+  
+  Model: llama-3.1-8b-instant
+  Temperature: 0.7
+  Response Format: JSON mode
+  
+  Features:
+  - Forced JSON output
+  - Auto-cleanup trailing commas
+  - Self-healing on parse errors
+end note
+
+note left of [Trip Form]
+  **User Input Fields**
+  
+  - Destination (text)
+  - Start/End Date (date)
+  - Budget (number)
+  - Travelers (number)
+  - Interests (checkboxes)
+  - Pace (select)
+  
+  NO Mode Selection
+  (Fast mode is default)
+end note
+
+note left of [Results Display]
+  **Professional UI**
+  
+  - No emojis
+  - Clean design
+  - Inter font
+  - Card-based layout
+  - CSS variables
+  - Responsive grid
+end note
+
+@enduml
