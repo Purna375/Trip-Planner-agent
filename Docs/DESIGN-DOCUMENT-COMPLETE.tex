@@ -1,0 +1,2797 @@
+% ============================================================================
+% AI Trip Planner - Complete Design Document with Rendered Diagrams
+% ============================================================================
+% Version: 1.0
+% Date: February 25, 2026
+% Author: Development Team
+%
+% COMPILATION INSTRUCTIONS:
+% This document uses PlantUML for diagram rendering.
+% Compile with: pdflatex --shell-escape DESIGN-DOCUMENT-COMPLETE.tex
+%
+% Requirements:
+% - PlantUML installed (plantuml.jar in PATH or texmf tree)
+% - Java Runtime Environment (JRE)
+% - --shell-escape flag enabled for pdflatex
+% ============================================================================
+
+\documentclass[12pt,a4paper]{report}
+
+% ============================================================================
+% PACKAGES
+% ============================================================================
+
+% Essential Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{textcomp}
+\usepackage{pdflscape}
+\usepackage{afterpage}
+\usepackage{plantuml}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning}
+
+% ============================================================================
+% PAGE SETUP
+% ============================================================================
+
+\geometry{
+    left=1in,
+    right=1in,
+    top=1in,
+    bottom=1in,
+    headheight=15pt
+}
+
+% ============================================================================
+% HYPERLINK SETUP
+% ============================================================================
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={AI Trip Planner - Design Document},
+    pdfauthor={Development Team},
+    pdfsubject={System Design and Architecture},
+    pdfkeywords={AI, Trip Planner, Design, LangChain, FastAPI},
+    bookmarks=true,
+    bookmarksopen=true,
+    pdfpagemode=UseOutlines
+}
+
+% ============================================================================
+% CODE LISTINGS SETUP
+% ============================================================================
+
+% Python Style
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!60!black}\itshape,
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=8pt,
+    backgroundcolor=\color{gray!10},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=single,
+    rulecolor=\color{black},
+    tabsize=4,
+    breaklines=true,
+    breakatwhitespace=false,
+    captionpos=b,
+    xleftmargin=2em,
+    framexleftmargin=1.5em
+}
+
+% JSON Style
+\lstdefinestyle{jsonStyle}{
+    basicstyle=\ttfamily\footnotesize,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=8pt,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    string=[s]{"}{"},
+    stringstyle=\color{blue},
+    xleftmargin=2em,
+    framexleftmargin=1.5em
+}
+
+% Bash/Shell Style
+\lstdefinestyle{bashStyle}{
+    language=bash,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!60!black}\itshape,
+    numbers=none,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    xleftmargin=2em,
+    framexleftmargin=1.5em
+}
+
+% PlantUML Style
+\lstdefinestyle{plantumlStyle}{
+    basicstyle=\ttfamily\footnotesize,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=8pt,
+    backgroundcolor=\color{blue!5},
+    frame=single,
+    rulecolor=\color{blue!50},
+    breaklines=true,
+    commentstyle=\color{green!60!black}\itshape,
+    keywordstyle=\color{purple}\bfseries,
+    stringstyle=\color{orange},
+    xleftmargin=2em,
+    framexleftmargin=1.5em,
+    captionpos=b
+}
+
+% YAML Style
+\lstdefinestyle{yamlStyle}{
+    basicstyle=\ttfamily\footnotesize,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{blue},
+    xleftmargin=2em,
+    framexleftmargin=1.5em
+}
+
+% ============================================================================
+% HEADER AND FOOTER
+% ============================================================================
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{AI Trip Planner - Design Document}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ============================================================================
+% CHAPTER AND SECTION FORMATTING
+% ============================================================================
+
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries\color{blue!70!black}}
+{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{blue!60!black}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{blue!50!black}}
+{\thesubsection}{1em}{}
+
+% ============================================================================
+% TABLE OF CONTENTS FORMATTING
+% ============================================================================
+
+\setlength{\cftbeforechapskip}{10pt}
+\renewcommand{\cftchapfont}{\bfseries\color{blue!70!black}}
+\renewcommand{\cftsecfont}{\color{blue!50!black}}
+
+% ============================================================================
+% CUSTOM COMMANDS
+% ============================================================================
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\file}[1]{\texttt{\textbf{#1}}}
+\newcommand{\endpoint}[1]{\textcolor{purple}{\texttt{#1}}}
+\newcommand{\method}[1]{\textcolor{orange}{\texttt{#1}}}
+
+% ============================================================================
+% DOCUMENT METADATA
+% ============================================================================
+
+\title{%
+    \Huge\textbf{Design Document}\\[0.5cm]
+    \LARGE AI Trip Planner Agent System\\[0.3cm]
+    \large Complete Technical Specification with Embedded Diagrams\\[1cm]
+    \includegraphics[width=0.3\textwidth]{logo.png}\\[1cm]
+    \normalsize Version 1.0
+}
+
+\author{Development Team}
+\date{February 25, 2026}
+
+% ============================================================================
+% BEGIN DOCUMENT
+% ============================================================================
+
+\begin{document}
+
+% ============================================================================
+% TITLE PAGE
+% ============================================================================
+
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    
+    {\Huge\textbf{Design Document}\par}
+    \vspace{0.5cm}
+    {\LARGE AI Trip Planner Agent System\par}
+    \vspace{0.3cm}
+    {\large Complete Technical Specification\par}
+    {\large with Embedded PlantUML Diagrams\par}
+    
+    \vspace{2cm}
+    
+    {\Large\textbf{Version 1.0}\par}
+    
+    \vspace{1cm}
+    
+    {\large Status: \textbf{Final}\par}
+    
+    \vspace{2cm}
+    
+    {\Large Development Team\par}
+    
+    \vspace{1cm}
+    
+    {\large February 25, 2026\par}
+    
+    \vfill
+    
+    {\small\textbf{Confidential}\\
+    This document contains proprietary information\\
+    and is intended for internal use only.\par}
+    
+\end{titlepage}
+
+% ============================================================================
+% DOCUMENT INFORMATION
+% ============================================================================
+
+\chapter*{Document Information}
+\addcontentsline{toc}{chapter}{Document Information}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Document Title} & AI Trip Planner - Design Document \\
+\hline
+\textbf{Version} & 1.0 \\
+\hline
+\textbf{Date} & February 25, 2026 \\
+\hline
+\textbf{Status} & Final \\
+\hline
+\textbf{Author} & Development Team \\
+\hline
+\textbf{Classification} & Confidential - Internal Use Only \\
+\hline
+\textbf{Distribution} & Architecture Team, Development Team, QA Team \\
+\hline
+\textbf{Related Documents} & Software Requirements Specification (SRS-Document.md) \\
+& Architecture Documentation (ARCHITECTURE.md) \\
+& API Documentation (FastAPI /docs) \\
+\hline
+\end{tabular}
+\caption*{Document Metadata}
+\end{table}
+
+\section*{Revision History}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|p{7cm}|p{3cm}|}
+\hline
+\textbf{Version} & \textbf{Date} & \textbf{Description} & \textbf{Author} \\
+\hline
+1.0 & 2026-02-25 & Initial design document with complete PlantUML diagrams & Development Team \\
+\hline
+\end{tabular}
+\end{table}
+
+% ============================================================================
+% TABLE OF CONTENTS
+% ============================================================================
+
+\tableofcontents
+\listoffigures
+\listoftables
+\lstlistoflistings
+
+% ============================================================================
+% CHAPTER 1: INTRODUCTION
+% ============================================================================
+
+\chapter{Introduction}
+
+\section{Purpose}
+
+This design document provides a comprehensive technical blueprint for the AI Trip Planner Agent system. It describes the architecture, components, interfaces, data structures, and design decisions that guide the implementation of this intelligent travel itinerary generation system.
+
+\subsection{Target Audience}
+
+This document is intended for:
+
+\begin{itemize}[leftmargin=*]
+    \item Software architects and senior developers
+    \item Backend and frontend development teams
+    \item DevOps and infrastructure engineers
+    \item Technical leads and system integrators
+    \item Quality assurance and testing teams
+\end{itemize}
+
+\section{Scope}
+
+This document covers the complete technical design of an AI-powered trip planning system that leverages LangChain agents with the ReAct (Reasoning + Acting) pattern to generate personalized travel itineraries.
+
+\subsection{System Capabilities}
+
+\begin{itemize}[leftmargin=*]
+    \item AI agent orchestration using LangChain framework
+    \item Integration with external APIs (Groq, OpenStreetMap, Open-Meteo, Overpass, OpenRouteService)
+    \item Real-time data aggregation and processing
+    \item Structured itinerary generation with budget tracking
+    \item Responsive web interface with modern UX
+    \item RESTful API with FastAPI framework
+\end{itemize}
+
+\subsection{Technology Stack}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Layer} & \textbf{Technologies} \\
+\hline
+\textbf{Backend} & Python 3.9+, FastAPI, LangChain, Pydantic \\
+\hline
+\textbf{Frontend} & HTML5, CSS3, JavaScript (ES6+) \\
+\hline
+\textbf{AI/LLM} & Groq API with Llama 3.1 models \\
+\hline
+\textbf{External APIs} & OpenStreetMap, Open-Meteo, Overpass API, OpenRouteService \\
+\hline
+\textbf{Deployment} & Docker, Cloud platforms (AWS/Azure/GCP) \\
+\hline
+\end{tabular}
+\caption{Technology Stack Overview}
+\label{tab:techstack}
+\end{table}
+
+\section{Definitions and Acronyms}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Term} & \textbf{Definition} \\
+\hline
+Agent & Autonomous AI system that reasons and uses tools \\
+\hline
+ReAct & Reasoning + Acting pattern for AI agents \\
+\hline
+LangChain & Framework for building LLM-powered applications \\
+\hline
+Groq & Ultra-fast AI inference platform \\
+\hline
+POI & Point of Interest (tourist attractions, restaurants, etc.) \\
+\hline
+Nominatim & OpenStreetMap's geocoding service \\
+\hline
+Overpass & OpenStreetMap's query API for POI data \\
+\hline
+FastAPI & Modern Python web framework for building APIs \\
+\hline
+Pydantic & Data validation library using Python type hints \\
+\hline
+CORS & Cross-Origin Resource Sharing \\
+\hline
+LLM & Large Language Model \\
+\hline
+REST & Representational State Transfer \\
+\hline
+\end{tabular}
+\caption{Definitions and Acronyms}
+\label{tab:definitions}
+\end{table}
+
+\section{Design Goals}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Performance:} Generate complete itineraries in under 60 seconds
+    \item \textbf{Scalability:} Support concurrent users without performance degradation
+    \item \textbf{Reliability:} Graceful handling of external API failures with fallbacks
+    \item \textbf{Maintainability:} Modular architecture with clear separation of concerns
+    \item \textbf{Usability:} Intuitive interface with real-time feedback
+    \item \textbf{Security:} Secure API key management and input validation
+    \item \textbf{Extensibility:} Easy addition of new tools and features
+\end{enumerate}
+
+\section{References}
+
+\begin{itemize}[leftmargin=*]
+    \item Software Requirements Specification (\file{SRS-Document.md})
+    \item Architecture Documentation (\file{ARCHITECTURE.md})
+    \item API Documentation (FastAPI /docs endpoint)
+    \item LangChain Documentation: \url{https://python.langchain.com/}
+    \item Groq API Docs: \url{https://console.groq.com/docs}
+    \item FastAPI Documentation: \url{https://fastapi.tiangolo.com/}
+\end{itemize}
+
+% ============================================================================
+% CHAPTER 2: SYSTEM OVERVIEW
+% ============================================================================
+
+\chapter{System Overview}
+
+\section{System Context}
+
+The AI Trip Planner is a standalone web-based application that integrates with multiple external services to provide intelligent travel planning capabilities. The system acts as an intermediary between users and various data sources, leveraging AI to synthesize information into coherent travel itineraries.
+
+\subsection{System Context Diagram}
+
+Figure \ref{fig:system-context} shows the high-level system context with all external actors and systems.
+
+\begin{figure}[H]
+    \centering
+    \begin{plantuml}
+@startuml system-context-diagram
+' System Context Diagram for AI Trip Planner
+
+!define RECTANGLE class
+
+skinparam rectangle {
+    BackgroundColor<<system>> LightBlue
+    BackgroundColor<<external>> LightYellow
+    BackgroundColor<<user>> LightGreen
+    BorderColor Black
+    FontSize 12
+}
+
+title AI Trip Planner System - Context Diagram
+
+rectangle "User" <<user>> as User {
+}
+
+rectangle "AI Trip Planner\nSystem" <<system>> as System {
+}
+
+rectangle "Groq API\n(LLM Service)" <<external>> as Groq {
+}
+
+rectangle "OpenStreetMap\n(Nominatim)" <<external>> as OSM {
+}
+
+rectangle "Open-Meteo\n(Weather)" <<external>> as Weather {
+}
+
+rectangle "Overpass API\n(POI Data)" <<external>> as Overpass {
+}
+
+rectangle "OpenRouteService\n(Routing)" <<external>> as ORS {
+}
+
+User --> System : "Submit trip\nrequirements"
+System --> User : "Return personalized\nitinerary"
+
+System --> Groq : "Send prompts\nfor AI generation"
+Groq --> System : "Return AI-generated\nresponses"
+
+System --> OSM : "Query location\ncoordinates"
+OSM --> System : "Return lat/lon\ndata"
+
+System --> Weather : "Request weather\nforecast"
+Weather --> System : "Return forecast\ndata"
+
+System --> Overpass : "Query points of\ninterest"
+Overpass --> System : "Return POI\nlist"
+
+System --> ORS : "Request route\ninformation"
+ORS --> System : "Return distance\nand duration"
+
+note right of System
+  **Core System Components:**
+  - FastAPI Backend
+  - LangChain Agent
+  - Web Frontend
+  - API Integration Layer
+end note
+
+@enduml
+\end{lstlisting}
+
+\section{High-Level Architecture}
+
+The system follows a three-tier architecture as illustrated in Figure \ref{fig:high-level-arch}.
+
+\subsection{Architectural Layers}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Presentation Layer (Frontend)}
+    \begin{itemize}
+        \item Single-page web application
+        \item Responsive UI for desktop and mobile
+        \item Client-side validation and state management
+    \end{itemize}
+    
+    \item \textbf{Application Layer (Backend)}
+    \begin{itemize}
+        \item FastAPI REST API server
+        \item AI agent orchestration with LangChain
+        \item Business logic and data processing
+        \item External API integration
+    \end{itemize}
+    
+    \item \textbf{Data Layer (External Services)}
+    \begin{itemize}
+        \item Groq API for LLM inference
+        \item OpenStreetMap for geocoding and POI data
+        \item Open-Meteo for weather forecasts
+        \item OpenRouteService for route optimization
+    \end{itemize}
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \begin{plantuml}
+@startuml high-level-architecture-diagram
+' High-Level Architecture Diagram
+
+!define RECTANGLE class
+
+skinparam rectangle {
+    BackgroundColor<<frontend>> LightGreen
+    BackgroundColor<<backend>> LightBlue
+    BackgroundColor<<external>> LightYellow
+    BorderColor Black
+    FontSize 11
+}
+
+title AI Trip Planner - High-Level Architecture
+
+package "Presentation Layer" <<frontend>> {
+    rectangle "Web Browser" {
+        rectangle "HTML5\n(Structure)" as HTML
+        rectangle "CSS3\n(Styling)" as CSS
+        rectangle "JavaScript\n(Logic)" as JS
+    }
+}
+
+package "Application Layer" <<backend>> {
+    rectangle "FastAPI Server" {
+        rectangle "REST API\nEndpoints" as API
+        rectangle "Request\nValidation" as Validation
+        rectangle "Response\nFormatting" as Formatting
+    }
+    
+    rectangle "Business Logic" {
+        rectangle "Trip Service\n(Orchestration)" as TripService
+        rectangle "API Service\n(Integration)" as APIService
+    }
+    
+    rectangle "AI Agent System" {
+        rectangle "LangChain\nAgent" as Agent
+        rectangle "Tool\nDefinitions" as Tools
+        rectangle "Prompt\nEngineering" as Prompts
+    }
+}
+
+package "Data Layer" <<external>> {
+    rectangle "Groq API\n(Llama 3.1)" as Groq
+    rectangle "OpenStreetMap\n(Geocoding)" as OSM
+    rectangle "Open-Meteo\n(Weather)" as Weather
+    rectangle "Overpass API\n(POI)" as Overpass
+    rectangle "OpenRouteService\n(Routing)" as ORS
+}
+
+HTML --> JS : "User\ninteractions"
+CSS --> HTML : "Styling"
+JS --> API : "HTTPS/JSON\nAPI calls"
+
+API --> Validation : "Validate\nrequest"
+Validation --> TripService : "Valid\nrequest"
+TripService --> APIService : "Fetch external\ndata"
+TripService --> Agent : "Generate\nitinerary"
+Agent --> Tools : "Use tools"
+
+APIService --> Groq : "LLM\nrequests"
+APIService --> OSM : "Geocoding"
+APIService --> Weather : "Forecast"
+APIService --> Overpass : "POI query"
+APIService --> ORS : "Route info"
+
+Agent --> Formatting : "Raw\nitinerary"
+Formatting --> API : "Formatted\nresponse"
+API --> JS : "JSON\nresponse"
+
+@enduml
+\end{lstlisting}
+
+\section{Key Design Patterns}
+
+\subsection{ReAct Agent Pattern}
+
+The core of the system uses the ReAct (Reasoning + Acting) pattern for AI agents:
+
+\begin{lstlisting}[style=pythonstyle, caption={ReAct Pattern Flow}]
+# Thought: Analyze what information is needed
+# Action: Call a tool to gather data
+# Observation: Process tool output
+# ... (repeat as needed)
+# Final Answer: Synthesize structured itinerary
+\end{lstlisting}
+
+\subsection{Service Layer Pattern}
+
+Business logic is separated into service layers:
+\begin{itemize}
+    \item \file{trip\_service.py}: Orchestrates trip planning workflow
+    \item \file{api\_service.py}: Manages external API calls
+    \item Clear separation between routes (controllers) and services
+\end{itemize}
+
+\subsection{Repository Pattern}
+
+External API calls are abstracted through a service layer, making it easy to:
+\begin{itemize}
+    \item Mock services for testing
+    \item Add caching layers
+    \item Implement retry logic
+    \item Switch API providers
+\end{itemize}
+
+% ============================================================================
+% CHAPTER 3: SYSTEM ARCHITECTURE
+% ============================================================================
+
+\chapter{System Architecture}
+
+\section{Architectural Style}
+
+The system implements a \textbf{Layered Architecture} with \textbf{Microservices principles}:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Separation of Concerns:} Frontend, backend, and external services are clearly separated
+    \item \textbf{Stateless Design:} No server-side session management
+    \item \textbf{API-First:} RESTful API as the primary interface
+    \item \textbf{Cloud-Native:} Containerized for easy deployment
+\end{itemize}
+
+\section{Component Architecture}
+
+Figure \ref{fig:component-arch} provides a detailed view of all system components and their relationships.
+
+\afterpage{
+\clearpage
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \begin{plantuml}
+@startuml component-architecture-diagram
+' Detailed Component Architecture Diagram
+
+!define COMPONENT rectangle
+
+skinparam component {
+    BackgroundColor LightBlue
+    BorderColor Black
+    FontSize 10
+}
+
+title AI Trip Planner - Component Architecture
+
+package "Frontend" {
+    [index.html] as HTML
+    [styles.css] as CSS
+    [app.js] as AppJS
+    [api.js] as ApiJS
+    
+    HTML --> AppJS : "includes"
+    HTML --> CSS : "styles"
+    AppJS --> ApiJS : "uses"
+}
+
+package "Backend - main.py" {
+    [FastAPI App] as App
+    [CORS Middleware] as CORS
+    [Exception Handler] as ExHandler
+    [Startup Events] as Startup
+    
+    App --> CORS : "configures"
+    App --> ExHandler : "registers"
+    App --> Startup : "runs"
+}
+
+package "Backend - routes/" {
+    [trip_planner.py] as Routes
+    [/api/plan-trip] as PlanTrip
+    [/api/health] as Health
+    [/api/sample-*] as Sample
+    
+    Routes --> PlanTrip : "defines"
+    Routes --> Health : "defines"
+    Routes --> Sample : "defines"
+}
+
+package "Backend - services/" {
+    [trip_service.py] as TripService
+    [api_service.py] as APIService
+    
+    TripService --> APIService : "uses"
+}
+
+package "Backend - agents/" {
+    [trip_agent.py] as TripAgent
+    [tools.py] as Tools
+    
+    TripAgent --> Tools : "registers"
+}
+
+package "Backend - models/" {
+    [schemas.py] as Schemas
+    [TripRequest] as TripReq
+    [TripResponse] as TripResp
+    [Activity] as Activity
+    [DayItinerary] as DayItin
+    
+    Schemas --> TripReq : "defines"
+    Schemas --> TripResp : "defines"
+    Schemas --> Activity : "defines"
+    Schemas --> DayItin : "defines"
+}
+
+package "Backend - utils/" {
+    [config.py] as Config
+    [helpers.py] as Helpers
+}
+
+package "External APIs" {
+    [Groq API] as Groq
+    [Nominatim] as Nominatim
+    [Open-Meteo] as OpenMeteo
+    [Overpass API] as Overpass
+    [OpenRouteService] as ORS
+}
+
+ApiJS --> App : "HTTP/JSON"
+App --> Routes : "routes to"
+
+PlanTrip --> TripService : "calls"
+PlanTrip --> Schemas : "validates with"
+
+TripService --> TripAgent : "invokes"
+TripService --> APIService : "calls"
+TripService --> Helpers : "uses"
+TripAgent --> Config : "reads"
+APIService --> Config : "reads"
+
+APIService --> Groq : "HTTPS"
+APIService --> Nominatim : "HTTPS"
+APIService --> OpenMeteo : "HTTPS"
+APIService --> Overpass : "HTTPS"
+APIService --> ORS : "HTTPS"
+Tools --> APIService : "wraps"
+
+@enduml
+    \end{plantuml}
+    \caption{Component Architecture Diagram}
+    \label{fig:component-arch}
+\end{figure}
+\end{landscape}
+\clearpage
+}
+
+\subsection{Frontend Components}
+
+\subsubsection{index.html}
+\begin{itemize}
+    \item Trip planning form
+    \item Loading state UI
+    \item Results display area
+    \item Error handling UI
+\end{itemize}
+
+\subsubsection{app.js}
+\begin{itemize}
+    \item Form submission handler
+    \item State management (currentTrip, isLoading)
+    \item UI controller (showSection, displayResults)
+    \item Loading animation controller
+    \item PDF generation
+\end{itemize}
+
+\subsubsection{api.js}
+\begin{itemize}
+    \item HTTP client wrapper
+    \item API endpoint calls
+    \item Error handling
+    \item Request/response transformation
+\end{itemize}
+
+\subsection{Backend Components}
+
+\subsubsection{main.py}
+
+\begin{lstlisting}[style=pythonstyle, caption={FastAPI Application Initialization}]
+app = FastAPI(
+    title="AI Trip Planner API",
+    description="AI-powered travel itinerary generation",
+    version="1.0.0",
+    docs_url="/docs"
+)
+
+app.add_middleware(CORSMiddleware, ...)
+app.include_router(trip_router)
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    logger.error(f"Unhandled exception: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"status": "error", "message": "Internal server error"}
+    )
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Application starting...")
+    # Validate configuration
+    # Check API keys
+\end{lstlisting}
+
+\subsubsection{routes/trip\_planner.py}
+
+\begin{lstlisting}[style=pythonstyle, caption={API Route Definitions}]
+@router.post("/api/plan-trip", response_model=TripResponse)
+async def plan_trip(request: TripRequest):
+    """Generate personalized trip itinerary"""
+    # Validate Groq API key
+    if not settings.groq_api_key:
+        raise HTTPException(
+            status_code=500,
+            detail="Groq API key not configured"
+        )
+    
+    # Call service layer
+    try:
+        response = await trip_service.plan_trip(request)
+        return response
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Trip planning failed: {e}")
+        raise HTTPException(status_code=500, detail="Internal error")
+
+@router.get("/api/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "service": "AI Trip Planner"}
+\end{lstlisting}
+
+\subsubsection{services/trip\_service.py}
+
+\begin{lstlisting}[style=pythonstyle, caption={Trip Service Orchestration}]
+class TripService:
+    async def plan_trip(self, request: TripRequest) -> TripResponse:
+        """Main orchestration method"""
+        # Calculate trip metrics
+        duration = calculate_duration(request.start_date, request.end_date)
+        daily_budget = request.budget / duration
+        
+        # Get destination coordinates
+        coords = await api_service.get_coordinates(request.destination)
+        
+        # Parallel API calls
+        weather, pois = await asyncio.gather(
+            api_service.get_weather_forecast(coords, ...),
+            api_service.get_points_of_interest(coords, ...)
+        )
+        
+        # Generate itinerary using AI agent
+        itinerary = await agent.plan_trip({
+            "destination": request.destination,
+            "coords": coords,
+            "weather": weather,
+            "pois": pois,
+            "budget": daily_budget,
+            "interests": request.interests,
+            "pace": request.pace
+        })
+        
+        return self._format_response(itinerary, request)
+\end{lstlisting}
+
+\subsubsection{agents/trip\_agent.py}
+
+\begin{lstlisting}[style=pythonstyle, caption={LangChain Agent Implementation}]
+class TripPlanningAgent:
+    def __init__(self):
+        self.llm = ChatGroq(
+            model="llama-3.1-8b-instant",
+            temperature=0.7,
+            groq_api_key=settings.groq_api_key
+        )
+        self.tools = trip_planning_tools
+        self.agent_executor = create_react_agent(
+            model=self.llm,
+            tools=self.tools,
+            prompt=system_prompt
+        )
+    
+    def plan_trip(self, trip_request: Dict) -> Dict:
+        """Execute agent to generate itinerary"""
+        user_query = self._construct_query(trip_request)
+        
+        result = self.agent_executor.invoke({
+            "input": user_query
+        })
+        
+        return self._parse_response(result["output"])
+\end{lstlisting}
+
+\section{Data Flow Architecture}
+
+The complete request/response flow is illustrated in Figure \ref{fig:data-flow}.
+
+\begin{figure}[H]
+    \centering
+    \begin{plantuml}
+@startuml data-flow-diagram
+' Data Flow Diagram - Shows complete request/response flow
+
+!theme plain
+
+skinparam activity {
+    BackgroundColor LightBlue
+    BorderColor Black
+    FontSize 10
+}
+
+title AI Trip Planner - Data Flow
+
+|User Browser|
+start
+:User fills trip planning form;
+:Validate input client-side;
+:Serialize to JSON;
+
+|Frontend API Client|
+:Send POST request to /api/plan-trip;
+
+|Backend FastAPI|
+:Receive HTTP request;
+:Parse JSON body;
+:Validate with Pydantic (TripRequest schema);
+
+if (Validation passed?) then (yes)
+    |Backend Routes|
+    :Check Groq API key exists;
+    
+    if (API key exists?) then (yes)
+        |Trip Service|
+        :Calculate trip metrics;
+        
+        |API Service - Geocoding|
+        :Call Nominatim API for destination;
+        :Parse coordinates (lat, lon);
+        
+        if (Location found?) then (yes)
+            |API Service - Parallel Calls|
+            fork
+                :Get weather forecast (Open-Meteo);
+            fork again
+                :Get points of interest (Overpass API);
+            end fork
+            
+            :Aggregate data;
+            
+            |Trip Service|
+            :Format weather data;
+            :Format POI data;
+            
+            |AI Agent|
+            :Initialize LangChain agent;
+            :Execute ReAct pattern;
+            :Parse agent final answer (JSON itinerary);
+            
+            |Backend Routes|
+            :Return HTTP 200 with JSON body;
+            
+            |User Browser|
+            :Display trip overview;
+            :Render daily itineraries;
+            :Show recommendations;
+            stop
+        else (no)
+            :Return HTTP 400 Validation Error;
+            stop
+        endif
+    else (no)
+        :Return HTTP 500 Configuration Error;
+        stop
+    endif
+else (no)
+    :Return HTTP 422 Validation Error;
+    stop
+endif
+
+@enduml
+    \end{plantuml}
+    \caption{Data Flow Diagram}
+    \label{fig:data-flow}
+\end{figure}
+
+\section{Deployment Architecture}
+
+Figure \ref{fig:deployment-arch} shows the production deployment topology.
+
+\begin{figure}[H]
+    \centering
+    \begin{plantuml}
+@startuml deployment-architecture-diagram
+' Deployment Architecture Diagram
+
+!define NODE node
+
+skinparam node {
+    BackgroundColor LightBlue
+    BorderColor Black
+    FontSize 10
+}
+
+skinparam cloud {
+    BackgroundColor LightYellow
+    BorderColor Black
+}
+
+skinparam database {
+    BackgroundColor LightGreen
+    BorderColor Black
+}
+
+title AI Trip Planner - Deployment Architecture
+
+cloud "Internet" as Internet
+
+node "Client Machine" {
+    [Web Browser] as Browser
+}
+
+cloud "Cloud Platform (AWS/Azure/GCP)" {
+    node "Load Balancer" {
+        [Application Load Balancer] as ALB
+    }
+    
+    node "Application Server 1" {
+        component [Docker Container 1] as Container1 {
+            [FastAPI App] as App1
+        }
+    }
+    
+    node "Application Server 2" {
+        component [Docker Container 2] as Container2 {
+            [FastAPI App] as App2
+        }
+    }
+    
+    database "Environment Variables" as EnvVars {
+        [GROQ_API_KEY]
+        [OPENROUTE_API_KEY]
+    }
+    
+    node "Monitoring" as Monitor {
+        [Logs]
+        [Metrics]
+        [Alerts]
+    }
+}
+
+cloud "External Services" {
+    node "Groq API" as GroqCloud
+    node "OpenStreetMap" as OSMCloud
+    node "Weather Services" as WeatherCloud
+}
+
+Internet -- Browser
+Browser --> ALB : HTTPS
+ALB --> Container1 : HTTP
+ALB --> Container2 : HTTP
+
+Container1 ..> EnvVars : reads
+Container2 ..> EnvVars : reads
+
+App1 --> GroqCloud : HTTPS
+App1 --> OSMCloud : HTTPS
+App1 --> WeatherCloud : HTTPS
+
+App2 --> GroqCloud : HTTPS
+App2 --> OSMCloud : HTTPS
+App2 --> WeatherCloud : HTTPS
+
+Container1 --> Monitor : Logs & Metrics
+Container2 --> Monitor : Logs & Metrics
+
+@enduml
+    \end{plantuml}
+    \caption{Deployment Architecture Diagram}
+    \label{fig:deployment-arch}
+\end{figure}
+
+% ============================================================================
+% CHAPTER 4: DATA DESIGN
+% ============================================================================
+
+\chapter{Data Design}
+
+\section{Data Models Overview}
+
+The system uses Pydantic models for data validation and serialization. Figure \ref{fig:data-models} illustrates the relationships between data models.
+
+\begin{figure}[H]
+    \centering
+    \begin{plantuml}
+@startuml data-models
+' Data Models Class Diagram
+
+!theme plain
+
+skinparam class {
+    BackgroundColor LightBlue
+    BorderColor Black
+    ArrowColor Black
+}
+
+title AI Trip Planner - Data Models
+
+class TripRequest {
+    +destination: str
+    +start_date: str
+    +end_date: str
+    +budget: float
+    +travelers: int
+    +interests: List[str]
+    +pace: str
+    --validators--
+    +validate_start_date()
+    +validate_end_date()
+    +validate_budget()
+}
+
+class TripResponse {
+    +overview: TripOverview
+    +itinerary: List[DayItinerary]
+    +smart_additions: SmartAdditions
+}
+
+class TripOverview {
+    +destination: str
+    +duration: int
+    +start_date: str
+    +end_date: str
+    +total_budget: float
+    +daily_budget: float
+    +travelers: int
+    +weather_summary: str
+    +coordinates: Dict[str, float]
+}
+
+class DayItinerary {
+    +day: int
+    +date: str
+    +morning: Activity
+    +afternoon: Activity
+    +evening: Activity
+    +weather: str
+    +travel_time: str
+    +total_cost: float
+    +notes: Optional[str]
+}
+
+class Activity {
+    +name: str
+    +description: str
+    +duration: str
+    +estimated_cost: float
+    +location: Optional[str]
+    +time_of_day: str
+}
+
+class SmartAdditions {
+    +packing_list: List[str]
+    +weather_tips: List[str]
+    +alternate_activities: List[str]
+    +local_tips: List[str]
+}
+
+TripResponse "1" *-- "1" TripOverview
+TripResponse "1" *-- "*" DayItinerary
+TripResponse "1" *-- "1" SmartAdditions
+DayItinerary "1" *-- "3" Activity : morning, afternoon, evening
+
+@enduml
+    \end{plantuml}
+    \caption{Data Models Diagram}
+    \label{fig:data-models}
+\end{figure}
+
+\section{Request Schemas}
+
+\subsection{TripRequest Model}
+
+\begin{lstlisting}[style=pythonstyle, caption={TripRequest Pydantic Model}]
+class TripRequest(BaseModel):
+    destination: str          # City or location name (min 2 chars)
+    start_date: str          # YYYY-MM-DD format
+    end_date: str            # YYYY-MM-DD format
+    budget: float            # Total budget in USD (>= 100)
+    travelers: int           # Number of travelers (1-20)
+    interests: List[str]     # e.g., ["culture", "food", "museums"]
+    pace: str                # "relaxed", "balanced", or "packed"
+    
+    @validator('start_date')
+    def validate_start_date(cls, v):
+        date = datetime.strptime(v, '%Y-%m-%d').date()
+        if date < datetime.now().date():
+            raise ValueError('Start date must be in the future')
+        return v
+    
+    @validator('end_date')
+    def validate_end_date(cls, v, values):
+        start_date = values.get('start_date')
+        if start_date:
+            start = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end = datetime.strptime(v, '%Y-%m-%d').date()
+            if end <= start:
+                raise ValueError('End date must be after start date')
+        return v
+\end{lstlisting}
+
+\subsection{Example Request}
+
+\begin{lstlisting}[style=jsonStyle, caption={Example Trip Request JSON}]
+{
+  "destination": "Paris, France",
+  "start_date": "2026-06-15",
+  "end_date": "2026-06-18",
+  "budget": 1500.0,
+  "travelers": 2,
+  "interests": ["culture", "food", "museums", "architecture"],
+  "pace": "balanced"
+}
+\end{lstlisting}
+
+\section{Response Schemas}
+
+\subsection{TripResponse Model}
+
+\begin{lstlisting}[style=pythonstyle, caption={TripResponse Pydantic Model}]
+class TripResponse(BaseModel):
+    overview: TripOverview               # Trip summary
+    itinerary: List[DayItinerary]       # Daily plans
+    smart_additions: SmartAdditions     # Recommendations
+
+class TripOverview(BaseModel):
+    destination: str
+    duration: int
+    start_date: str
+    end_date: str
+    total_budget: float
+    daily_budget: float
+    travelers: int
+    weather_summary: str
+    coordinates: Dict[str, float]
+
+class DayItinerary(BaseModel):
+    day: int
+    date: str
+    morning: Activity
+    afternoon: Activity
+    evening: Activity
+    weather: str
+    travel_time: str
+    total_cost: float
+    notes: Optional[str]
+
+class Activity(BaseModel):
+    name: str
+    description: str
+    duration: str
+    estimated_cost: float
+    location: Optional[str]
+    time_of_day: str
+\end{lstlisting}
+
+\section{External API Data Models}
+
+\subsection{Geocoding Data (Nominatim)}
+
+\begin{lstlisting}[style=jsonStyle, caption={Nominatim API Response}]
+{
+    "lat": "48.8566969",
+    "lon": "2.3514616",
+    "display_name": "Paris, Ile-de-France, France",
+    "importance": 0.878
+}
+\end{lstlisting}
+
+\subsection{Weather Data (Open-Meteo)}
+
+\begin{lstlisting}[style=jsonStyle, caption={Open-Meteo API Response}]
+{
+    "daily": {
+        "time": ["2026-06-15", "2026-06-16", "2026-06-17"],
+        "temperature_2m_max": [23.4, 24.1, 22.8],
+        "temperature_2m_min": [15.2, 16.0, 15.8],
+        "precipitation_sum": [0.0, 0.0, 2.3],
+        "weathercode": [0, 1, 3]
+    }
+}
+\end{lstlisting}
+
+% ============================================================================
+% CHAPTER 5: INTERFACE DESIGN
+% ============================================================================
+
+\chapter{Interface Design}
+
+\section{User Interface Design}
+
+\subsection{Design Principles}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Simplicity:} Clean, uncluttered interface
+    \item \textbf{Responsiveness:} Mobile-first design, works on all screen sizes
+    \item \textbf{Feedback:} Real-time validation and loading states
+    \item \textbf{Accessibility:} WCAG 2.1 Level AA compliance
+    \item \textbf{Consistency:} Uniform styling and interaction patterns
+\end{itemize}
+
+\subsection{UI Wireframe}
+
+Figure \ref{fig:ui-wireframe} shows the complete user interface layout.
+
+\begin{figure}[H]
+    \centering
+    \begin{plantuml}
+@startuml ui-wireframe
+' UI Wireframe for Trip Planner Interface
+
+!theme plain
+
+skinparam rectangle {
+    BackgroundColor<<header>> LightBlue
+    BackgroundColor<<form>> LightGreen
+    BackgroundColor<<loading>> LightYellow
+    BackgroundColor<<results>> LightCyan
+    BackgroundColor<<error>> LightCoral
+    BackgroundColor<<footer>> LightGray
+    BorderColor Black
+}
+
+title AI Trip Planner - User Interface Wireframe
+
+rectangle "Browser Window" {
+    rectangle "Header Section" <<header>> {
+        rectangle "AI Trip Planner" as Title
+        rectangle "AI-Powered Travel Planning" as Subtitle
+    }
+    
+    rectangle "Main Content Area" {
+        rectangle "Input Section" <<form>> {
+            rectangle "Trip Planning Form" {
+                rectangle "Destination Input"
+                rectangle "Start Date Picker"
+                rectangle "End Date Picker"
+                rectangle "Budget Input"
+                rectangle "Travelers Count"
+                rectangle "Interests Checkboxes"
+                rectangle "Travel Pace Selector"
+                
+                rectangle "Submit Button" <<header>> {
+                    rectangle "Plan My Trip"
+                }
+            }
+        }
+        
+        rectangle "Loading Section" <<loading>> {
+            rectangle "Loading Animation"
+            rectangle "Progress Bar"
+            rectangle "Status Messages"
+        }
+        
+        rectangle "Results Section" <<results>> {
+            rectangle "Trip Overview Card"
+            rectangle "Daily Itinerary Container"
+            rectangle "Smart Recommendations"
+            rectangle "Action Buttons"
+        }
+        
+        rectangle "Error Section" <<error>> {
+            rectangle "Error Banner"
+            rectangle "Error Message"
+            rectangle "Retry Button"
+        }
+    }
+    
+    rectangle "Footer Section" <<footer>> {
+        rectangle "Copyright"
+        rectangle "Links"
+    }
+}
+
+@enduml
+    \end{plantuml}
+    \caption{User Interface Wireframe}
+    \label{fig:ui-wireframe}
+\end{figure}
+
+\section{API Interface Design}
+
+\subsection{REST API Endpoints}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Endpoint} & \textbf{Method} & \textbf{Purpose} & \textbf{Auth} \\
+\hline
+\code{/api/plan-trip} & POST & Generate itinerary & None \\
+\hline
+\code{/api/health} & GET & Health check & None \\
+\hline
+\code{/api/sample-request} & GET & Example request & None \\
+\hline
+\code{/docs} & GET & Swagger UI & None \\
+\hline
+\code{/redoc} & GET & ReDoc UI & None \\
+\hline
+\end{tabular}
+\caption{API Endpoints}
+\label{tab:api-endpoints}
+\end{table}
+
+\subsection{HTTP Status Codes}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|l|p{7cm}|}
+\hline
+\textbf{Code} & \textbf{Meaning} & \textbf{Usage} \\
+\hline
+200 & OK & Successful trip planning \\
+\hline
+400 & Bad Request & Invalid input data \\
+\hline
+422 & Unprocessable Entity & Pydantic validation error \\
+\hline
+429 & Too Many Requests & Rate limit exceeded \\
+\hline
+500 & Internal Server Error & Server-side error \\
+\hline
+503 & Service Unavailable & External API failure \\
+\hline
+\end{tabular}
+\caption{HTTP Status Codes}
+\label{tab:http-status}
+\end{table}
+
+% ============================================================================
+% CHAPTER 6: SECURITY DESIGN
+% ============================================================================
+
+\chapter{Security Design}
+
+\section{Security Architecture}
+
+Figure \ref{fig:security-arch} illustrates the multi-layered security architecture.
+
+\begin{figure}[H]
+    \centering
+    \begin{plantuml}
+@startuml security-architecture-diagram
+' Security Architecture Diagram
+
+!theme plain
+
+skinparam rectangle {
+    BackgroundColor<<security>> LightYellow
+    BackgroundColor<<data>> LightBlue
+    BackgroundColor<<network>> LightGreen
+    BorderColor Black
+}
+
+title AI Trip Planner - Security Architecture
+
+rectangle "Client Security Layer" <<security>> {
+    rectangle "Browser Security" {
+        component [HTTPS/TLS]
+        component [Content Security Policy]
+        component [Input Validation]
+        component [XSS Prevention]
+    }
+}
+
+rectangle "Network Security Layer" <<network>> {
+    rectangle "Transport Security" {
+        component [TLS 1.2+]
+        component [SSL Certificates]
+        component [HSTS Headers]
+    }
+    
+    rectangle "API Security" {
+        component [CORS Policy]
+        component [Rate Limiting]
+        component [IP Filtering]
+    }
+}
+
+rectangle "Application Security Layer" <<security>> {
+    rectangle "Input Security" {
+        component [Pydantic Validation]
+        component [Type Checking]
+        component [String Sanitization]
+    }
+    
+    rectangle "Output Security" {
+        component [JSON Encoding]
+        component [HTML Escaping]
+        component [Error Masking]
+    }
+}
+
+rectangle "Data Security Layer" <<data>> {
+    rectangle "Secrets Management" {
+        component [Environment Variables]
+        component [API Key Storage]
+        component [Key Masking in Logs]
+    }
+}
+
+[Browser Security] --> [Transport Security]
+[Transport Security] --> [API Security]
+[API Security] --> [Input Security]
+[Input Security] --> [Output Security]
+[Output Security] --> [Secrets Management]
+
+@enduml
+    \end{plantuml}
+    \caption{Security Architecture Diagram}
+    \label{fig:security-arch}
+\end{figure}
+
+\section{Authentication and Authorization}
+
+\subsection{Current State}
+\begin{itemize}
+    \item No user authentication (public API)
+    \item No authorization required
+    \item Rate limiting by IP address
+\end{itemize}
+
+\subsection{Future Enhancements}
+\begin{itemize}
+    \item JWT-based authentication
+    \item API key authentication for programmatic access
+    \item Role-based access control (RBAC)
+    \item OAuth2 integration
+\end{itemize}
+
+\section{Data Security}
+
+\subsection{Input Validation}
+
+\begin{lstlisting}[style=pythonstyle, caption={Pydantic Validators}]
+@validator('destination')
+def validate_destination(cls, v):
+    if len(v) < 2:
+        raise ValueError("Destination too short")
+    if not v.strip():
+        raise ValueError("Destination required")
+    # Sanitize HTML/script tags
+    return v.strip()
+
+@validator('budget')
+def validate_budget(cls, v):
+    if v < 100:
+        raise ValueError("Budget must be at least $100")
+    if v > 1000000:
+        raise ValueError("Budget exceeds maximum")
+    return v
+\end{lstlisting}
+
+\subsection{API Key Protection}
+
+\begin{lstlisting}[style=pythonstyle, caption={Secret Management}]
+# Environment variables (never hardcoded)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+OPENROUTE_API_KEY = os.getenv("OPENROUTE_API_KEY")
+
+# Masked in logs
+def mask_api_key(key: str) -> str:
+    if len(key) > 8:
+        return f"{key[:4]}...{key[-4:]}"
+    return "****"
+
+logger.info(f"Using API key: {mask_api_key(GROQ_API_KEY)}")
+\end{lstlisting}
+
+\section{Communication Security}
+
+\subsection{HTTPS/TLS Configuration}
+
+\begin{lstlisting}[style=bashStyle, caption={SSL Certificate Setup}]
+# Generate SSL certificate (development)
+openssl req -x509 -newkey rsa:4096 \
+    -keyout key.pem -out cert.pem \
+    -days 365 -nodes
+
+# Run with HTTPS
+uvicorn main:app --ssl-keyfile=key.pem --ssl-certfile=cert.pem
+\end{lstlisting}
+
+\subsection{CORS Configuration}
+
+\begin{lstlisting}[style=pythonstyle, caption={CORS Middleware}]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "https://yourdomain.com"
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
+    max_age=3600
+)
+\end{lstlisting}
+
+% ============================================================================
+% CHAPTER 7: PERFORMANCE CONSIDERATIONS
+% ============================================================================
+
+\chapter{Performance Considerations}
+
+\section{Performance Requirements}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Metric} & \textbf{Target} \\
+\hline
+Complete trip planning & < 60 seconds (95th percentile) \\
+\hline
+API response time & < 5 seconds (95th percentile) \\
+\hline
+Frontend load time & < 2 seconds \\
+\hline
+Concurrent users & 10+ without degradation \\
+\hline
+Memory usage & < 500MB per worker \\
+\hline
+CPU usage & < 80\% under load \\
+\hline
+\end{tabular}
+\caption{Performance Targets}
+\label{tab:performance-targets}
+\end{table}
+
+\section{Backend Performance Optimization}
+
+\subsection{Parallel API Calls}
+
+\begin{lstlisting}[style=pythonstyle, caption={Parallel Execution with asyncio}]
+# Sequential (slow) - 9 seconds total
+coords = await get_coordinates(location)      # 3s
+weather = await get_weather(coords)           # 2s
+pois = await get_points_of_interest(coords)  # 4s
+
+# Parallel (fast) - 4 seconds total
+coords = await get_coordinates(location)
+weather, pois = await asyncio.gather(
+    get_weather(coords),
+    get_points_of_interest(coords)
+)
+\end{lstlisting}
+
+\subsection{Caching Strategy}
+
+\begin{lstlisting}[style=pythonstyle, caption={Geocoding Cache Implementation}]
+from cachetools import TTLCache
+
+# In-memory cache with 24-hour TTL
+geocoding_cache = TTLCache(maxsize=1000, ttl=86400)
+
+async def get_coordinates(location: str):
+    if location in geocoding_cache:
+        logger.debug(f"Cache hit for {location}")
+        return geocoding_cache[location]
+    
+    result = await call_nominatim_api(location)
+    geocoding_cache[location] = result
+    return result
+\end{lstlisting}
+
+\subsection{Connection Pooling}
+
+\begin{lstlisting}[style=pythonstyle, caption={HTTP Client Configuration}]
+import httpx
+
+limits = httpx.Limits(
+    max_keepalive_connections=20,
+    max_connections=100,
+    keepalive_expiry=30
+)
+
+client = httpx.AsyncClient(
+    limits=limits,
+    timeout=30.0,
+    http2=True
+)
+\end{lstlisting}
+
+\section{Load Testing}
+
+\begin{lstlisting}[style=pythonstyle, caption={Locust Load Test Script}]
+from locust import HttpUser, task, between
+
+class TripPlannerUser(HttpUser):
+    wait_time = between(1, 5)
+    
+    @task(10)
+    def plan_trip(self):
+        self.client.post("/api/plan-trip", json={
+            "destination": "Paris, France",
+            "start_date": "2026-06-15",
+            "end_date": "2026-06-18",
+            "budget": 1500,
+            "travelers": 2,
+            "interests": ["culture", "food"],
+            "pace": "balanced"
+        })
+    
+    @task(2)
+    def health_check(self):
+        self.client.get("/api/health")
+\end{lstlisting}
+
+% ============================================================================
+% CHAPTER 8: DEPLOYMENT ARCHITECTURE
+% ============================================================================
+
+\chapter{Deployment Architecture}
+
+\section{Docker Deployment}
+
+\subsection{Dockerfile}
+
+\begin{lstlisting}[style=bashStyle, caption={Production Dockerfile}]
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY backend/ .
+COPY frontend/ ../frontend/
+
+# Create non-root user
+RUN useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app
+USER appuser
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/api/health')"
+
+# Run application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+\end{lstlisting}
+
+\subsection{Docker Compose}
+
+\begin{lstlisting}[style=yamlStyle, caption={docker-compose.yml}]
+version: '3.8'
+
+services:
+  tripplanner:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENROUTE_API_KEY=${OPENROUTE_API_KEY}
+      - DEBUG=False
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+\end{lstlisting}
+
+\section{Cloud Deployment}
+
+\subsection{AWS Deployment}
+
+\begin{lstlisting}[style=bashStyle, caption={AWS ECS Deployment Commands}]
+# Build and push Docker image to ECR
+aws ecr get-login-password --region us-east-1 | \
+    docker login --username AWS --password-stdin <account>.dkr.ecr.us-east-1.amazonaws.com
+
+docker build -t tripplanner:latest .
+docker tag tripplanner:latest <account>.dkr.ecr.us-east-1.amazonaws.com/tripplanner:latest
+docker push <account>.dkr.ecr.us-east-1.amazonaws.com/tripplanner:latest
+
+# Create ECS task definition and service
+aws ecs create-service \
+    --cluster tripplanner-cluster \
+    --service-name tripplanner-service \
+    --task-definition tripplanner:1 \
+    --desired-count 2 \
+    --launch-type FARGATE
+\end{lstlisting}
+
+\subsection{Kubernetes Deployment}
+
+\begin{lstlisting}[style=yamlStyle, caption={Kubernetes Deployment YAML}]
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tripplanner
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tripplanner
+  template:
+    metadata:
+      labels:
+        app: tripplanner
+    spec:
+      containers:
+      - name: tripplanner
+        image: tripplanner:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: GROQ_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tripplanner-secrets
+              key: groq-api-key
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripplanner-service
+spec:
+  selector:
+    app: tripplanner
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer
+\end{lstlisting}
+
+\section{Scaling Strategy}
+
+\subsection{Horizontal Pod Autoscaler}
+
+\begin{lstlisting}[style=yamlStyle, caption={HPA Configuration}]
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: tripplanner-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: tripplanner
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+\end{lstlisting}
+
+% ============================================================================
+% CHAPTER 9: ERROR HANDLING STRATEGY
+% ============================================================================
+
+\chapter{Error Handling Strategy}
+
+\section{Error Categories}
+
+\subsection{Client Errors (4xx)}
+
+\begin{lstlisting}[style=pythonstyle, caption={Client Error Handling}]
+# 400 Bad Request
+if not request.destination:
+    raise HTTPException(
+        status_code=400,
+        detail="Destination is required"
+    )
+
+# 422 Unprocessable Entity (Pydantic validation)
+try:
+    trip_request = TripRequest(**data)
+except ValidationError as e:
+    raise HTTPException(
+        status_code=422,
+        detail=e.errors()
+    )
+
+# 429 Too Many Requests
+if rate_limiter.is_rate_limited(client_ip):
+    raise HTTPException(
+        status_code=429,
+        detail="Rate limit exceeded. Please try again later."
+    )
+\end{lstlisting}
+
+\subsection{Server Errors (5xx)}
+
+\begin{lstlisting}[style=pythonstyle, caption={Server Error Handling}]
+# 500 Internal Server Error
+try:
+    result = await trip_service.plan_trip(request)
+    return result
+except Exception as e:
+    logger.error(f"Unexpected error: {e}", exc_info=True)
+    raise HTTPException(
+        status_code=500,
+        detail="Internal server error"
+    )
+
+# 503 Service Unavailable
+try:
+    coords = await api_service.get_coordinates(location)
+except ExternalAPIError as e:
+    raise HTTPException(
+        status_code=503,
+        detail="External service temporarily unavailable"
+    )
+\end{lstlisting}
+
+\section{Fallback Mechanisms}
+
+\begin{lstlisting}[style=pythonstyle, caption={Fallback Strategy}]
+async def get_coordinates_with_fallback(location: str):
+    """Get coordinates with fallback to default"""
+    try:
+        return await nominatim_api.get_coordinates(location)
+    except Exception as e:
+        logger.warning(f"Geocoding failed: {e}")
+        # Return approximate coordinates for known cities
+        return fallback_coordinates.get(location.lower())
+
+async def get_weather_with_default(coords: Dict):
+    """Get weather with default message"""
+    try:
+        return await open_meteo_api.get_forecast(coords)
+    except Exception as e:
+        logger.warning(f"Weather API failed: {e}")
+        return {
+            "summary": "Weather information unavailable. Check forecast before traveling.",
+            "daily": []
+        }
+\end{lstlisting}
+
+\section{Retry Logic}
+
+\begin{lstlisting}[style=pythonstyle, caption={Exponential Backoff Retry}]
+import random
+import asyncio
+
+async def retry_with_backoff(func, max_retries=3, base_delay=1):
+    """Retry function with exponential backoff"""
+    for attempt in range(max_retries):
+        try:
+            return await func()
+        except Exception as e:
+            if attempt == max_retries - 1:
+                logger.error(f"All retries failed: {e}")
+                raise
+            
+            delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+            logger.warning(
+                f"Attempt {attempt + 1} failed, retrying in {delay:.2f}s: {e}"
+            )
+            await asyncio.sleep(delay)
+
+# Usage
+coords = await retry_with_backoff(
+    lambda: api_service.get_coordinates(location),
+    max_retries=3
+)
+\end{lstlisting}
+
+% ============================================================================
+% CHAPTER 10: TESTING STRATEGY
+% ============================================================================
+
+\chapter{Testing Strategy}
+
+\section{Testing Pyramid}
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+        /\
+       /  \    E2E Tests (5%)
+      /____\   
+     /      \  Integration Tests (15%)
+    /________\ 
+   /          \
+  /____________\ Unit Tests (80%)
+    \end{verbatim}
+    \caption{Testing Pyramid}
+    \label{fig:testing-pyramid}
+\end{figure}
+
+\section{Unit Testing}
+
+\begin{lstlisting}[style=pythonstyle, caption={Unit Test Examples with pytest}]
+import pytest
+from backend.models.schemas import TripRequest
+from pydantic import ValidationError
+
+def test_trip_request_validation_success():
+    """Test valid trip request"""
+    request = TripRequest(
+        destination="Paris, France",
+        start_date="2026-06-15",
+        end_date="2026-06-18",
+        budget=1500,
+        travelers=2,
+        interests=["culture", "food"],
+        pace="balanced"
+    )
+    assert request.destination == "Paris, France"
+    assert request.budget == 1500
+
+def test_trip_request_validation_invalid_dates():
+    """Test invalid date range"""
+    with pytest.raises(ValidationError):
+        TripRequest(
+            destination="Paris",
+            start_date="2026-06-18",
+            end_date="2026-06-15",  # Before start_date
+            budget=1500,
+            travelers=2,
+            interests=["culture"],
+            pace="balanced"
+        )
+
+def test_trip_request_validation_budget_too_low():
+    """Test budget minimum constraint"""
+    with pytest.raises(ValidationError):
+        TripRequest(
+            destination="Paris",
+            start_date="2026-06-15",
+            end_date="2026-06-18",
+            budget=50,  # Below minimum
+            travelers=2,
+            interests=["culture"],
+            pace="balanced"
+        )
+
+@pytest.mark.asyncio
+async def test_api_service_get_coordinates():
+    """Test geocoding API call"""
+    from backend.services.api_service import APIService
+    
+    service = APIService()
+    result = await service.get_coordinates("Paris, France")
+    
+    assert result is not None
+    assert "lat" in result
+    assert "lon" in result
+    assert abs(result["lat"] - 48.8566) < 0.1
+\end{lstlisting}
+
+\section{Integration Testing}
+
+\begin{lstlisting}[style=pythonstyle, caption={Integration Test Examples}]
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_trip_planning_integration():
+    """Test complete trip planning flow"""
+    from backend.services.trip_service import TripService
+    from backend.models.schemas import TripRequest
+    
+    request = TripRequest(
+        destination="Paris, France",
+        start_date="2026-06-15",
+        end_date="2026-06-18",
+        budget=1500,
+        travelers=2,
+        interests=["culture", "food"],
+        pace="balanced"
+    )
+    
+    service = TripService()
+    response = await service.plan_trip(request)
+    
+    # Assertions
+    assert response.overview.destination
+    assert len(response.itinerary) == 4
+    assert response.itinerary[0].morning.name
+    assert response.smart_additions.packing_list
+\end{lstlisting}
+
+\section{API Testing}
+
+\begin{lstlisting}[style=pythonstyle, caption={API Endpoint Tests}]
+from fastapi.testclient import TestClient
+from backend.main import app
+
+client = TestClient(app)
+
+def test_health_endpoint():
+    """Test health check endpoint"""
+    response = client.get("/api/health")
+    assert response.status_code == 200
+    assert response.json()["status"] == "healthy"
+
+def test_plan_trip_endpoint_success():
+    """Test successful trip planning"""
+    request_data = {
+        "destination": "Paris, France",
+        "start_date": "2026-06-15",
+        "end_date": "2026-06-18",
+        "budget": 1500,
+        "travelers": 2,
+        "interests": ["culture", "food"],
+        "pace": "balanced"
+    }
+    
+    response = client.post("/api/plan-trip", json=request_data)
+    assert response.status_code == 200
+    
+    data = response.json()
+    assert "overview" in data
+    assert "itinerary" in data
+    assert "smart_additions" in data
+
+def test_plan_trip_endpoint_validation_error():
+    """Test validation error handling"""
+    request_data = {
+        "destination": "Paris",
+        "start_date": "2026-06-18",
+        "end_date": "2026-06-15",  # Invalid: before start
+        "budget": 1500,
+        "travelers": 2,
+        "interests": ["culture"],
+        "pace": "balanced"
+    }
+    
+    response = client.post("/api/plan-trip", json=request_data)
+    assert response.status_code == 422
+\end{lstlisting}
+
+\section{Load Testing}
+
+\begin{lstlisting}[style=pythonstyle, caption={Load Test with Locust}]
+from locust import HttpUser, task, between
+import random
+
+class TripPlannerUser(HttpUser):
+    wait_time = between(1, 5)
+    
+    destinations = [
+        "Paris, France",
+        "Tokyo, Japan",
+        "New York, USA",
+        "London, UK"
+    ]
+    
+    @task(10)
+    def plan_trip(self):
+        """Main trip planning task"""
+        self.client.post("/api/plan-trip", json={
+            "destination": random.choice(self.destinations),
+            "start_date": "2026-06-15",
+            "end_date": "2026-06-18",
+            "budget": random.randint(500, 3000),
+            "travelers": random.randint(1, 4),
+            "interests": random.sample(
+                ["culture", "food", "museums", "nature"],
+                k=2
+            ),
+            "pace": random.choice(["relaxed", "balanced", "packed"])
+        })
+    
+    @task(2)
+    def health_check(self):
+        """Health check task"""
+        self.client.get("/api/health")
+\end{lstlisting}
+
+Run command:
+\begin{lstlisting}[style=bashStyle]
+locust -f locustfile.py --host=http://localhost:8000 --users 50 --spawn-rate 5
+\end{lstlisting}
+
+% ============================================================================
+% APPENDICES
+% ============================================================================
+
+\appendix
+
+\chapter{Compilation Instructions}
+\label{appendix:compilation}
+
+This document uses PlantUML for direct diagram rendering. Follow these steps to compile successfully.
+
+\section{Prerequisites}
+
+\begin{enumerate}
+    \item \textbf{Java Runtime Environment (JRE):} Required for PlantUML
+    \begin{lstlisting}[style=bashStyle]
+java -version  # Should show Java 8 or higher
+    \end{lstlisting}
+    
+    \item \textbf{PlantUML Installation:}
+    \begin{itemize}
+        \item Download \texttt{plantuml.jar} from \url{https://plantuml.com/download}
+        \item Place in your texmf tree or add to system PATH
+    \end{itemize}
+    
+    \item \textbf{Graphviz (Optional but Recommended):}
+    \begin{lstlisting}[style=bashStyle]
+# Windows (with Chocolatey)
+choco install graphviz
+
+# macOS
+brew install graphviz
+
+# Linux
+sudo apt-get install graphviz
+    \end{lstlisting}
+\end{enumerate}
+
+\section{Compilation Commands}
+
+\subsection{Standard Compilation}
+
+\begin{lstlisting}[style=bashStyle]
+# Compile with shell-escape (REQUIRED)
+pdflatex --shell-escape DESIGN-DOCUMENT-COMPLETE.tex
+
+# Run twice for proper TOC and references
+pdflatex --shell-escape DESIGN-DOCUMENT-COMPLETE.tex
+\end{lstlisting}
+
+\subsection{Alternative: Using latexmk}
+
+\begin{lstlisting}[style=bashStyle]
+latexmk -pdf -shell-escape DESIGN-DOCUMENT-COMPLETE.tex
+\end{lstlisting}
+
+\section{Troubleshooting}
+
+\subsection{Error: plantuml.jar not found}
+
+\textbf{Solution:} Add PlantUML to your PATH or specify location:
+
+\begin{lstlisting}[style=bashStyle]
+# Set PLANTUML environment variable
+export PLANTUML="/path/to/plantuml.jar"
+\end{lstlisting}
+
+\subsection{Error: shell-escape disabled}
+
+\textbf{Solution:} Ensure you use the \texttt{--shell-escape} flag:
+
+\begin{lstlisting}[style=bashStyle]
+pdflatex --shell-escape DESIGN-DOCUMENT-COMPLETE.tex
+\end{lstlisting}
+
+\subsection{Diagrams not rendering}
+
+\textbf{Checklist:}
+\begin{enumerate}
+    \item Verify Java is installed: \texttt{java -version}
+    \item Check PlantUML is accessible: \texttt{java -jar plantuml.jar -version}
+    \item Ensure shell-escape is enabled
+    \item Check LaTeX log for specific PlantUML errors
+\end{enumerate}
+
+\section{Performance Notes}
+
+\begin{itemize}
+    \item First compilation may take 2-5 minutes (diagrams rendering)
+    \item Subsequent compilations are faster (cached diagrams)
+    \item Each diagram generates a separate .png file in the working directory
+\end{itemize}
+
+% ============================================================================
+% TECHNOLOGY STACK REFERENCE
+% ============================================================================
+
+\chapter{Technology Stack Reference}
+
+\section{Complete Technology Inventory}
+
+\begin{longtable}{|l|l|p{7cm}|}
+\caption{Complete Technology Stack} \\
+\hline
+\textbf{Layer} & \textbf{Technology} & \textbf{Purpose} \\
+\hline
+\endfirsthead
+
+\multicolumn{3}{c}{\textit{(Continued from previous page)}} \\
+\hline
+\textbf{Layer} & \textbf{Technology} & \textbf{Purpose} \\
+\hline
+\endhead
+
+\hline \multicolumn{3}{r}{\textit{(Continued on next page)}} \\
+\endfoot
+
+\hline
+\endlastfoot
+
+Frontend & HTML5 & Structure and markup \\
+\hline
+Frontend & CSS3 & Styling and responsive design \\
+\hline
+Frontend & JavaScript ES6+ & Client-side logic \\
+\hline
+Backend Framework & FastAPI 0.100+ & REST API server \\
+\hline
+Backend Language & Python 3.9+ & Core programming language \\
+\hline
+AI Framework & LangChain 0.1+ & Agent orchestration \\
+\hline
+LLM Provider & Groq API & AI inference platform \\
+\hline
+LLM Model & Llama 3.1 8B Instant & Fast language model \\
+\hline
+Validation & Pydantic 2.0+ & Data validation and serialization \\
+\hline
+HTTP Client & httpx & Async HTTP requests \\
+\hline
+ASGI Server & Uvicorn & Production ASGI server \\
+\hline
+Geocoding & OSM Nominatim & Location coordinates \\
+\hline
+Weather & Open-Meteo & Weather forecasts \\
+\hline
+POI & Overpass API & Points of interest \\
+\hline
+Routing & OpenRouteService & Route calculation \\
+\hline
+Containerization & Docker & Application containerization \\
+\hline
+Orchestration & Kubernetes & Container orchestration (optional) \\
+\hline
+Testing & pytest & Unit and integration tests \\
+\hline
+Testing & pytest-asyncio & Async test support \\
+\hline
+Testing & Locust & Load testing \\
+\hline
+Code Quality & Black & Code formatting \\
+\hline
+Code Quality & Pylint & Linting \\
+\hline
+Code Quality & mypy & Type checking \\
+\hline
+\end{longtable}
+
+\section{Python Package Dependencies}
+
+\begin{lstlisting}[style=bashStyle, caption={requirements.txt}]
+# Core Framework
+fastapi==0.100.0
+uvicorn[standard]==0.23.0
+pydantic==2.0.0
+pydantic-settings==2.0.0
+
+# AI/LLM
+langchain==0.1.0
+groq==0.4.0
+
+# HTTP/Async
+httpx==0.24.0
+aiohttp==3.8.0
+
+# Utilities
+python-dotenv==1.0.0
+python-multipart==0.0.6
+
+# Testing
+pytest==7.4.0
+pytest-asyncio==0.21.0
+pytest-cov==4.1.0
+locust==2.15.0
+
+# Development
+black==23.7.0
+pylint==2.17.0
+mypy==1.4.0
+\end{lstlisting}
+
+% ============================================================================
+% API ENDPOINT REFERENCE
+% ============================================================================
+
+\chapter{API Endpoint Reference}
+
+\section{Complete Endpoint Documentation}
+
+\subsection{POST /api/plan-trip}
+
+\textbf{Purpose:} Generate personalized trip itinerary
+
+\textbf{Request:}
+\begin{lstlisting}[style=jsonStyle]
+{
+  "destination": "string (min 2 chars)",
+  "start_date": "YYYY-MM-DD (future date)",
+  "end_date": "YYYY-MM-DD (after start_date)",
+  "budget": "number (>= 100)",
+  "travelers": "integer (1-20)",
+  "interests": ["string", ...],
+  "pace": "relaxed|balanced|packed"
+}
+\end{lstlisting}
+
+\textbf{Response (200 OK):}
+\begin{lstlisting}[style=jsonStyle]
+{
+  "overview": {
+    "destination": "string",
+    "duration": "integer",
+    "start_date": "string",
+    "end_date": "string",
+    "total_budget": "number",
+    "daily_budget": "number",
+    "travelers": "integer",
+    "weather_summary": "string",
+    "coordinates": {"lat": "number", "lon": "number"}
+  },
+  "itinerary": [
+    {
+      "day": "integer",
+      "date": "string",
+      "morning": { "name": "...", ... },
+      "afternoon": { "name": "...", ... },
+      "evening": { "name": "...", ... },
+      "weather": "string",
+      "travel_time": "string",
+      "total_cost": "number"
+    }
+  ],
+  "smart_additions": {
+    "packing_list": ["string", ...],
+    "weather_tips": ["string", ...],
+    "alternate_activities": ["string", ...],
+    "local_tips": ["string", ...]
+  }
+}
+\end{lstlisting}
+
+\textbf{Error Responses:}
+\begin{itemize}
+    \item 400: Invalid input data
+    \item 422: Validation error (Pydantic)
+    \item 500: Internal server error
+    \item 503: External API unavailable
+\end{itemize}
+
+\subsection{GET /api/health}
+
+\textbf{Purpose:} Service health check
+
+\textbf{Response (200 OK):}
+\begin{lstlisting}[style=jsonStyle]
+{
+  "status": "healthy",
+  "service": "AI Trip Planner",
+  "version": "1.0.0"
+}
+\end{lstlisting}
+
+\subsection{GET /api/sample-request}
+
+\textbf{Purpose:} Get example request for testing
+
+\textbf{Response (200 OK):}
+\begin{lstlisting}[style=jsonStyle]
+{
+  "destination": "Paris, France",
+  "start_date": "2026-06-15",
+  "end_date": "2026-06-18",
+  "budget": 1500,
+  "travelers": 2,
+  "interests": ["culture", "food", "museums"],
+  "pace": "balanced"
+}
+\end{lstlisting}
+
+% ============================================================================
+% CONFIGURATION REFERENCE
+% ============================================================================
+
+\chapter{Configuration Reference}
+
+\section{Environment Variables}
+
+\begin{longtable}{|l|l|l|p{5cm}|}
+\caption{Environment Variables} \\
+\hline
+\textbf{Variable} & \textbf{Required} & \textbf{Default} & \textbf{Description} \\
+\hline
+\endfirsthead
+
+\multicolumn{4}{c}{\textit{(Continued from previous page)}} \\
+\hline
+\textbf{Variable} & \textbf{Required} & \textbf{Default} & \textbf{Description} \\
+\hline
+\endhead
+
+\hline
+\endlastfoot
+
+\code{GROQ\_API\_KEY} & Yes & - & Groq API authentication key \\
+\hline
+\code{OPENROUTE\_API\_KEY} & No & - & OpenRouteService API key (optional) \\
+\hline
+\code{HOST} & No & 0.0.0.0 & Server bind address \\
+\hline
+\code{PORT} & No & 8000 & Server port number \\
+\hline
+\code{DEBUG} & No & True & Debug mode flag \\
+\hline
+\code{CORS\_ORIGINS} & No & localhost & Comma-separated allowed origins \\
+\hline
+\code{LOG\_LEVEL} & No & INFO & Logging level (DEBUG, INFO, WARNING, ERROR) \\
+\hline
+\code{MAX\_WORKERS} & No & 4 & Number of worker processes \\
+\hline
+\end{longtable}
+
+\section{.env.example}
+
+\begin{lstlisting}[style=bashStyle, caption={.env.example Template}]
+# Groq API Key (REQUIRED)
+GROQ_API_KEY=your_groq_api_key_here
+
+# OpenRouteService API Key (OPTIONAL)
+# System has fallback if not provided
+OPENROUTE_API_KEY=your_openroute_key_here
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=8000
+DEBUG=True
+
+# CORS Configuration (comma-separated origins)
+CORS_ORIGINS=http://localhost:3000,http://localhost:8000,http://127.0.0.1:5500
+
+# Logging
+LOG_LEVEL=INFO
+
+# Worker Configuration
+MAX_WORKERS=4
+
+# External API Endpoints (defaults shown)
+NOMINATIM_API_URL=https://nominatim.openstreetmap.org
+OPEN_METEO_API_URL=https://api.open-meteo.com
+OVERPASS_API_URL=https://overpass-api.de/api/interpreter
+OPENROUTE_API_URL=https://api.openrouteservice.org
+
+# LLM Configuration
+LLM_MODEL=llama-3.1-8b-instant
+LLM_TEMPERATURE=0.7
+LLM_MAX_TOKENS=2000
+\end{lstlisting}
+
+% ============================================================================
+% ERROR CODE REFERENCE
+% ============================================================================
+
+\chapter{Error Code Reference}
+
+\begin{longtable}{|l|c|p{5cm}|p{4cm}|}
+\caption{Error Code Reference} \\
+\hline
+\textbf{Code} & \textbf{HTTP Status} & \textbf{Description} & \textbf{User Action} \\
+\hline
+\endfirsthead
+
+\multicolumn{4}{c}{\textit{(Continued from previous page)}} \\
+\hline
+\textbf{Code} & \textbf{HTTP Status} & \textbf{Description} & \textbf{User Action} \\
+\hline
+\endhead
+
+\hline
+\endlastfoot
+
+\code{INVALID\_DATE} & 400 & Invalid date format or logic & Check date inputs \\
+\hline
+\code{INVALID\_BUDGET} & 400 & Budget too low or invalid & Increase budget to minimum \$100 \\
+\hline
+\code{LOCATION\_NOT\_FOUND} & 400 & Destination not found & Check spelling, use full city name \\
+\hline
+\code{VALIDATION\_ERROR} & 422 & Pydantic validation failed & Review all input fields \\
+\hline
+\code{API\_KEY\_MISSING} & 500 & Groq API key not configured & Contact system administrator \\
+\hline
+\code{EXTERNAL\_API\_ERROR} & 503 & External service unavailable & Retry after a few minutes \\
+\hline
+\code{LLM\_ERROR} & 500 & LLM failed to generate response & Retry request \\
+\hline
+\code{RATE\_LIMIT\_EXCEEDED} & 429 & Too many requests & Wait 60 seconds before retrying \\
+\hline
+\code{TIMEOUT\_ERROR} & 504 & Request timeout & Simplify request or retry \\
+\hline
+\end{longtable}
+
+% ============================================================================
+% GLOSSARY
+% ============================================================================
+
+\chapter*{Glossary}
+\addcontentsline{toc}{chapter}{Glossary}
+
+\begin{description}[leftmargin=3cm, style=nextline]
+    \item[Agent] Autonomous AI system that can reason about problems and take actions using tools.
+    
+    \item[API] Application Programming Interface - set of rules for software communication.
+    
+    \item[ASGI] Asynchronous Server Gateway Interface - async web server standard.
+    
+    \item[CORS] Cross-Origin Resource Sharing - mechanism for resource sharing across domains.
+    
+    \item[FastAPI] Modern Python web framework for building APIs with automatic documentation.
+    
+    \item[Groq] Ultra-fast AI inference platform optimized for LLM workloads.
+    
+    \item[LangChain] Framework for developing applications powered by language models.
+    
+    \item[LLM] Large Language Model - AI model trained on vast text data.
+    
+    \item[Nominatim] OpenStreetMap's search engine for geocoding and reverse geocoding.
+    
+    \item[Overpass] Read-only API for querying OpenStreetMap data.
+    
+    \item[POI] Point of Interest - tourist attraction, restaurant, or other notable location.
+    
+    \item[Pydantic] Data validation library using Python type annotations.
+    
+    \item[ReAct] Reasoning + Acting pattern for AI agents that alternates between thinking and tool use.
+    
+    \item[REST] Representational State Transfer - architectural style for web services.
+    
+    \item[TTL] Time To Live - duration for which data is cached.
+    
+    \item[Uvicorn] Lightning-fast ASGI server for Python web applications.
+\end{description}
+
+% ============================================================================
+% DOCUMENT APPROVAL
+% ============================================================================
+
+\chapter*{Document Approval}
+\addcontentsline{toc}{chapter}{Document Approval}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{4cm}|p{4cm}|p{3cm}|}
+\hline
+\textbf{Role} & \textbf{Name} & \textbf{Signature} & \textbf{Date} \\
+\hline
+Lead Architect & & & \\[0.8cm]
+\hline
+Backend Lead & & & \\[0.8cm]
+\hline
+Frontend Lead & & & \\[0.8cm]
+\hline
+DevOps Lead & & & \\[0.8cm]
+\hline
+QA Lead & & & \\[0.8cm]
+\hline
+Technical Director & & & \\[0.8cm]
+\hline
+Product Manager & & & \\[0.8cm]
+\hline
+\end{tabular}
+\end{table}
+
+\vspace{2cm}
+
+\begin{center}
+\Large\textbf{--- End of Design Document ---}
+
+\vspace{1cm}
+
+\textit{This document is subject to change. All updates should be reviewed \\
+and approved by the technical leads before implementation.}
+
+\vspace{1cm}
+
+\small
+\textbf{Document Classification:} Confidential - Internal Use Only\\
+\textbf{Version:} 1.0\\
+\textbf{Date:} February 25, 2026\\
+\textbf{Next Review:} August 25, 2026
+\end{center}
+
+\end{document}

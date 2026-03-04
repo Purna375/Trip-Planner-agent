@@ -1,252 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Trip Planner - Professional Travel Planning</title>
+    <title>TripPlanner AI - Where Nature Meets Intelligence</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/home.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.158.0/three.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
 </head>
-<body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="header-content">
-                <div class="brand">
-                    <h1 class="brand-title">TripPlanner</h1>
-                    <span class="brand-badge">AI Powered</span>
-                </div>
-                <p class="brand-tagline">Intelligent travel planning in seconds</p>
-            </div>
-        </header>
 
-        <!-- Main Content -->
-        <main class="main-container">
-            <!-- Planning Form Section -->
-            <section id="inputSection" class="section-visible">
-                <div class="form-container">
-                    <div class="section-header">
-                        <h2 class="section-title">Plan Your Trip</h2>
-                        <p class="section-description">Tell us about your travel plans and we'll create a personalized itinerary</p>
-                    </div>
+<body data-page="home">
 
-                    <form id="tripForm" class="trip-form">
-                        <!-- Primary Details -->
-                        <div class="form-section">
-                            <h3 class="form-section-title">Destination & Dates</h3>
-                            <div class="form-row">
-                                <div class="form-field form-field-wide">
-                                    <label for="destination" class="field-label">Where are you going?</label>
-                                    <input 
-                                        type="text" 
-                                        id="destination" 
-                                        name="destination" 
-                                        class="field-input"
-                                        placeholder="Enter city or country"
-                                        required
-                                    >
-                                </div>
-                            </div>
+    <!-- Three.js Canvas Background -->
+    <canvas id="heroCanvas" class="hero-canvas"></canvas>
 
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label for="startDate" class="field-label">Start Date</label>
-                                    <input 
-                                        type="date" 
-                                        id="startDate" 
-                                        name="startDate"
-                                        class="field-input"
-                                        required
-                                    >
-                                </div>
-
-                                <div class="form-field">
-                                    <label for="endDate" class="field-label">End Date</label>
-                                    <input 
-                                        type="date" 
-                                        id="endDate" 
-                                        name="endDate"
-                                        class="field-input"
-                                        required
-                                    >
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Travel Details -->
-                        <div class="form-section">
-                            <h3 class="form-section-title">Travel Details</h3>
-                            <div class="form-row">
-                                <div class="form-field">
-                                    <label for="budget" class="field-label">Budget (USD)</label>
-                                    <input 
-                                        type="number" 
-                                        id="budget" 
-                                        name="budget"
-                                        class="field-input"
-                                        min="100"
-                                        step="50"
-                                        placeholder="2000"
-                                        required
-                                    >
-                                </div>
-
-                                <div class="form-field">
-                                    <label for="travelers" class="field-label">Number of Travelers</label>
-                                    <input 
-                                        type="number" 
-                                        id="travelers" 
-                                        name="travelers"
-                                        class="field-input"
-                                        min="1" 
-                                        max="20"
-                                        value="2"
-                                        required
-                                    >
-                                </div>
-
-                                <div class="form-field">
-                                    <label for="pace" class="field-label">Travel Pace</label>
-                                    <select id="pace" name="pace" class="field-select">
-                                        <option value="relaxed">Relaxed</option>
-                                        <option value="balanced" selected>Balanced</option>
-                                        <option value="packed">Packed</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Interests -->
-                        <div class="form-section">
-                            <h3 class="form-section-title">Your Interests</h3>
-                            <p class="form-section-subtitle">Select what matters most to you</p>
-                            <div class="interests-container">
-                                <label class="interest-chip">
-                                    <input type="checkbox" name="interests" value="culture" checked>
-                                    <span class="chip-content">Culture</span>
-                                </label>
-                                <label class="interest-chip">
-                                    <input type="checkbox" name="interests" value="history">
-                                    <span class="chip-content">History</span>
-                                </label>
-                                <label class="interest-chip">
-                                    <input type="checkbox" name="interests" value="food" checked>
-                                    <span class="chip-content">Food & Dining</span>
-                                </label>
-                                <label class="interest-chip">
-                                    <input type="checkbox" name="interests" value="nature">
-                                    <span class="chip-content">Nature</span>
-                                </label>
-                                <label class="interest-chip">
-                                    <input type="checkbox" name="interests" value="adventure">
-                                    <span class="chip-content">Adventure</span>
-                                </label>
-                                <label class="interest-chip">
-                                    <input type="checkbox" name="interests" value="museums">
-                                    <span class="chip-content">Museums</span>
-                                </label>
-                                <label class="interest-chip">
-                                    <input type="checkbox" name="interests" value="art">
-                                    <span class="chip-content">Art</span>
-                                </label>
-                                <label class="interest-chip">
-                                    <input type="checkbox" name="interests" value="shopping">
-                                    <span class="chip-content">Shopping</span>
-                                </label>
-                                <label class="interest-chip">
-                                    <input type="checkbox" name="interests" value="nightlife">
-                                    <span class="chip-content">Nightlife</span>
-                                </label>
-                                <label class="interest-chip">
-                                    <input type="checkbox" name="interests" value="local_life">
-                                    <span class="chip-content">Local Life</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="submit-button" id="planButton">
-                            <span class="button-text">Generate Itinerary</span>
-                        </button>
-                    </form>
-                </div>
-            </section>
-
-            <!-- Loading Section -->
-            <section id="loadingSection" class="section-hidden">
-                <div class="loading-container">
-                    <div class="loader-spinner"></div>
-                    <h3 class="loading-title">Creating Your Itinerary</h3>
-                    <p class="loading-subtitle">Analyzing destinations, weather, and attractions...</p>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressBar"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Results Section -->
-            <section id="resultsSection" class="section-hidden">
-                <div class="results-container">
-                    <div class="results-header">
-                        <div class="results-header-content">
-                            <h2 class="results-title" id="destinationTitle">Your Trip Itinerary</h2>
-                            <p class="results-meta" id="tripMeta"></p>
-                        </div>
-                        <div class="results-actions">
-                            <button class="action-button action-button-secondary" id="planAnotherButton">
-                                Plan Another Trip
-                            </button>
-                            <button class="action-button action-button-primary" id="downloadButton">
-                                Download PDF
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Trip Overview -->
-                    <div class="overview-card" id="tripOverview">
-                        <!-- Populated by JavaScript -->
-                    </div>
-
-                    <!-- Daily Itinerary -->
-                    <div class="itinerary-container" id="itineraryContainer">
-                        <!-- Populated by JavaScript -->
-                    </div>
-
-                    <!-- Recommendations -->
-                    <div class="recommendations-grid" id="recommendationsGrid">
-                        <!-- Populated by JavaScript -->
-                    </div>
-                </div>
-            </section>
-
-            <!-- Error Section -->
-            <section id="errorSection" class="section-hidden">
-                <div class="error-container">
-                    <div class="error-icon">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
-                    </div>
-                    <h3 class="error-title">Unable to Create Itinerary</h3>
-                    <p class="error-message" id="errorMessage">Something went wrong. Please try again.</p>
-                    <button class="action-button action-button-primary" id="retryButton">
-                        Try Again
-                    </button>
-                </div>
-            </section>
-        </main>
-
-        <!-- Footer -->
-        <footer class="app-footer">
-            <p class="footer-text">Powered by AI &middot; &copy; 2026 TripPlanner</p>
-        </footer>
+    <!-- Floating Decorative Elements -->
+    <div class="floating-elements" aria-hidden="true">
+        <div class="float-leaf" style="--delay:0s;--x:8%;--y:18%;"></div>
+        <div class="float-leaf" style="--delay:2.5s;--x:85%;--y:55%;"></div>
+        <div class="float-leaf" style="--delay:4.5s;--x:18%;--y:78%;"></div>
+        <div class="float-butterfly" style="--delay:1s;--x:72%;--y:28%;"></div>
+        <div class="float-butterfly" style="--delay:3.5s;--x:28%;--y:65%;"></div>
     </div>
 
-    <script src="js/api.js"></script>
+    <div class="page-wrapper">
+
+        <!-- ===== NAVIGATION ===== -->
+        <nav class="main-nav" id="mainNav">
+            <div class="nav-container">
+                <a href="index.html" class="brand">
+                    <span class="brand-icon">🌿</span>
+                    <div class="brand-content">
+                        <span class="brand-name">TripPlanner</span>
+                        <span class="brand-tag">by Nature AI</span>
+                    </div>
+                </a>
+                <div class="nav-links">
+                    <a href="index.html" class="nav-link active"><span>Explore</span></a>
+                    <a href="plan.html" class="nav-link"><span>Plan Trip</span></a>
+                    <a href="#features" class="nav-link"><span>Features</span></a>
+                </div>
+                <button class="nav-cta" onclick="location.href='plan.html'">
+                    <span class="btn-text">Begin Journey</span>
+                    <span class="btn-icon">→</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- ===== HERO ===== -->
+        <section class="lp-hero" id="landingSection">
+            <div class="lp-hero__inner">
+
+                <div class="lp-badge">
+                    <span class="lp-badge__dot"></span>
+                    AI-Powered Journey Crafting
+                </div>
+
+                <h1 class="lp-headline">
+                    <span>Wander</span>
+                    <span>Beyond</span>
+                    <span class="lp-headline__accent">Boundaries</span>
+                </h1>
+
+                <p class="lp-sub">
+                    Let artificial intelligence and natural wisdom guide you to
+                    <strong>extraordinary places</strong>. Every journey is a story
+                    waiting to unfold, painted with the colors of adventure.
+                </p>
+
+                <div class="lp-actions">
+                    <button class="lp-btn lp-btn--primary" onclick="location.href='plan.html'">
+                        Craft My Journey
+                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                            <path d="M4 10h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <button class="lp-btn lp-btn--secondary" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+                        Discover More
+                    </button>
+                </div>
+
+                <div class="lp-stats">
+                    <div class="lp-stat">
+                        <span class="lp-stat__emoji">🌍</span>
+                        <span class="lp-stat__num">195+</span>
+                        <span class="lp-stat__label">Countries</span>
+                    </div>
+                    <div class="lp-stat__sep"></div>
+                    <div class="lp-stat">
+                        <span class="lp-stat__emoji">✈️</span>
+                        <span class="lp-stat__num">50K+</span>
+                        <span class="lp-stat__label">Journeys Created</span>
+                    </div>
+                    <div class="lp-stat__sep"></div>
+                    <div class="lp-stat">
+                        <span class="lp-stat__emoji">⭐</span>
+                        <span class="lp-stat__num">98%</span>
+                        <span class="lp-stat__label">Satisfaction</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="lp-scroll-hint" aria-hidden="true">
+                <span class="lp-scroll-hint__line"></span>
+                <span class="lp-scroll-hint__label">Scroll</span>
+            </div>
+        </section>
+
+        <!-- ===== FEATURES ===== -->
+        <section class="lp-features" id="features">
+            <div class="lp-features__inner">
+
+                <p class="lp-eyebrow">What Makes Us Different</p>
+                <h2 class="lp-section-title">
+                    Journeys Crafted by <span class="lp-green">Intelligence</span>
+                </h2>
+                <p class="lp-section-sub">Where cutting-edge AI meets timeless travel wisdom</p>
+
+                <div class="lp-cards">
+                    <div class="lp-card">
+                        <div class="lp-card__icon-wrap">🧭</div>
+                        <h3 class="lp-card__title">Intelligent Curation</h3>
+                        <p class="lp-card__desc">Our AI analyzes millions of data points to discover hidden gems, secret trails, and authentic local experiences tailored just for you.</p>
+                        <div class="lp-card__tags">
+                            <span>Machine Learning</span>
+                            <span>Smart Picks</span>
+                        </div>
+                    </div>
+
+                    <div class="lp-card lp-card--mid">
+                        <div class="lp-card__icon-wrap">🌦️</div>
+                        <h3 class="lp-card__title">Weather Wisdom</h3>
+                        <p class="lp-card__desc">Real-time atmospheric intelligence ensures every activity is perfectly synchronized with nature's rhythm and seasonal magic.</p>
+                        <div class="lp-card__tags">
+                            <span>Real-time Data</span>
+                            <span>Climate Aware</span>
+                        </div>
+                    </div>
+
+                    <div class="lp-card">
+                        <div class="lp-card__icon-wrap">🎨</div>
+                        <h3 class="lp-card__title">Personalized Flow</h3>
+                        <p class="lp-card__desc">From serene meditation retreats to adrenaline-fueled adventures — each itinerary reflects your unique spirit and pace.</p>
+                        <div class="lp-card__tags">
+                            <span>Custom Pacing</span>
+                            <span>Your Style</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ===== HOW IT WORKS ===== -->
+        <section class="lp-steps">
+            <div class="lp-steps__inner">
+                <p class="lp-eyebrow">Simple Process</p>
+                <h2 class="lp-section-title">Plan in Three Steps</h2>
+
+                <div class="lp-steps__row">
+                    <div class="lp-step">
+                        <div class="lp-step__num">01</div>
+                        <div class="lp-step__icon">📍</div>
+                        <h4>Choose Destination</h4>
+                        <p>Tell us where you dream of going — anywhere on Earth.</p>
+                    </div>
+                    <div class="lp-step__line"></div>
+                    <div class="lp-step">
+                        <div class="lp-step__num">02</div>
+                        <div class="lp-step__icon">⚙️</div>
+                        <h4>Set Preferences</h4>
+                        <p>Budget, dates, pace, interests — we shape it around you.</p>
+                    </div>
+                    <div class="lp-step__line"></div>
+                    <div class="lp-step">
+                        <div class="lp-step__num">03</div>
+                        <div class="lp-step__icon">🗺️</div>
+                        <h4>Get Your Itinerary</h4>
+                        <p>Receive a full day-by-day plan, crafted instantly by AI.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== TESTIMONIAL ===== -->
+        <section class="lp-testimonial">
+            <div class="lp-testimonial__inner">
+                <div class="lp-quote-mark">&ldquo;</div>
+                <p class="lp-quote-text">
+                    This AI turned our generic vacation plan into an unforgettable journey
+                    through hidden valleys and local treasures we never would have discovered on our own.
+                </p>
+                <div class="lp-quote-author">
+                    <div class="lp-avatar">SM</div>
+                    <div>
+                        <div class="lp-author-name">Sarah Martinez</div>
+                        <div class="lp-author-role">Adventurer · Barcelona</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CTA ===== -->
+        <section class="lp-cta">
+            <div class="lp-cta__inner">
+                <h2 class="lp-cta__title">Ready to Write Your Story?</h2>
+                <p class="lp-cta__sub">Let nature and intelligence collaborate on your next masterpiece</p>
+                <button class="lp-btn lp-btn--primary lp-btn--lg" onclick="location.href='plan.html'">
+                    Start Planning Now
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                        <path d="M4 10h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="minimal-footer">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="footer-icon">🌿</span>
+                    <span class="footer-name">TripPlanner AI</span>
+                </div>
+                <p class="footer-text">Where wanderlust meets artificial intelligence</p>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Privacy</a>
+                    <span class="footer-dot">•</span>
+                    <a href="#" class="footer-link">Terms</a>
+                    <span class="footer-dot">•</span>
+                    <a href="#" class="footer-link">Contact</a>
+                </div>
+                <p class="footer-copyright">&copy; 2026 TripPlanner AI. Crafted with ♥ for Modern Voyagers</p>
+            </div>
+        </footer>
+
+    </div>
+
     <script src="js/app.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </body>
 </html>

@@ -1,0 +1,135 @@
+@startuml data-flow-diagram
+' Data Flow Diagram
+' Shows how data flows through the system from user input to final response
+
+!theme plain
+
+skinparam activity {
+    BackgroundColor LightBlue
+    BorderColor Black
+    FontSize 10
+}
+
+title AI Trip Planner - Data Flow
+
+|User Browser|
+start
+:User fills trip\nplanning form;
+:Validate input\nclient-side;
+:Serialize to JSON;
+
+|Frontend API Client|
+:Send POST request\nto /api/plan-trip;
+note right
+  **Request Payload:**
+  - destination
+  - start_date, end_date
+  - budget, travelers
+  - interests, pace
+end note
+
+|Backend FastAPI|
+:Receive HTTP request;
+:Parse JSON body;
+:Validate with Pydantic\n(TripRequest schema);
+
+if (Validation passed?) then (yes)
+    |Backend Routes|
+    :Check Groq API key\nexists;
+    
+    if (API key exists?) then (yes)
+        |Trip Service|
+        :Calculate trip metrics\n(duration, daily budget);
+        
+        |API Service - Geocoding|
+        :Call Nominatim API\nfor destination;
+        :Parse coordinates\n(lat, lon);
+        
+        if (Location found?) then (yes)
+            |API Service - Parallel Calls|
+            fork
+                :Get weather forecast\n(Open-Meteo);
+                note right: 7-day forecast
+            fork again
+                :Get points of interest\n(Overpass API);
+                note right: Tourism, museums,\nrestaurants, etc.
+            end fork
+            
+            :Aggregate data;
+            
+            |Trip Service|
+            :Format weather data\n(daily summaries);
+            :Format POI data\n(categorized list);
+            
+            |AI Agent (Optional Path)|
+            :Initialize LangChain agent;
+            :Construct agent prompt\nwith trip requirements;
+            :Agent execution loop\n(ReAct pattern);
+            
+            repeat
+                :Agent thinks\n(reasoning);
+                :Agent acts\n(calls tool);
+                :Observe tool output;
+            repeat while (Agent done?) is (no)
+            ->yes;
+            
+            :Parse agent final answer\n(JSON itinerary);
+            
+            |Alternative: Fast Mode|
+            :Send formatted data\ndirectly to Groq LLM;
+            :Request structured\nJSON itinerary;
+            :Parse LLM response;
+            
+            |Trip Service|
+            :Validate response structure;
+            :Format as TripResponse;
+            :Add metadata;
+            
+            |Backend Routes|
+            :Return HTTP 200\nwith JSON body;
+            
+            |Frontend API Client|
+            :Receive response;
+            :Parse JSON data;
+            
+            |User Browser|
+            :Hide loading state;
+            :Display trip overview;
+            :Render daily itineraries;
+            :Show recommendations;
+            :Enable download/print;
+            stop
+            
+        else (no - location not found)
+            |Backend Routes|
+            :Return HTTP 400\nValidation Error;
+            note right: "Location not found"
+        endif
+        
+    else (no - API key missing)
+        |Backend Routes|
+        :Return HTTP 500\nConfiguration Error;
+        note right: "Groq API key not configured"
+    endif
+    
+else (no - validation failed)
+    |Backend Routes|
+    :Return HTTP 422\nValidation Error;
+    note right
+      Pydantic validation errors:
+      - Invalid date format
+      - Budget too low
+      - Missing fields
+    end note
+endif
+
+|Frontend API Client|
+:Catch error;
+:Parse error message;
+
+|User Browser|
+:Display error message;
+:Show retry button;
+stop
+
+@enduml

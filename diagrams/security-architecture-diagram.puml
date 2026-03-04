@@ -1,0 +1,130 @@
+@startuml security-architecture-diagram
+
+title AI Trip Planner - Security Flow Architecture
+
+skinparam ActivityBackgroundColor LightBlue
+skinparam ActivityBorderColor Black
+skinparam ActivityDiamondBackgroundColor LightYellow
+skinparam ActivityDiamondBorderColor Black
+
+start
+
+partition "User Browser" {
+  :User submits trip request;
+  note right
+    Client-side validation:
+    - Required fields
+    - Date format
+    - Budget range
+  end note
+  
+  :Establish HTTPS/TLS connection;
+  note right
+    Transport Security:
+    - TLS 1.2+ encryption
+    - Valid SSL certificate
+    - HSTS enabled
+  end note
+}
+
+partition "API Gateway" {
+  :CORS origin verification;
+  note right
+    - Check allowed origins
+    - Verify request headers
+    - Block unauthorized domains
+  end note
+  
+  if (Rate limit exceeded?) then (yes)
+    :Return 429 error;
+    stop
+  else (no)
+    :Allow request;
+  endif
+}
+
+partition "Backend Server" {
+  :Pydantic schema validation;
+  note right
+    Input Security:
+    - Type checking
+    - Field constraints
+    - SQL injection prevention
+    - XSS attack prevention
+  end note
+  
+  if (Validation passed?) then (no)
+    :Return 422 validation error;
+    stop
+  else (yes)
+    :Process request;
+  endif
+  
+  :Load API keys from environment;
+  note right
+    Secret Management:
+    - Environment variables
+    - Never in code/Git
+    - Masked in logs
+  end note
+  
+  :Call external APIs securely;
+  note right
+    - HTTPS only
+    - API key authentication
+    - Timeout protection
+  end note
+  
+  :Generate itinerary response;
+  
+  :Apply output security;
+  note right
+    - JSON encoding
+    - HTML escaping
+    - Error message masking
+  end note
+}
+
+partition "API Gateway" {
+  :Add security headers;
+  note right
+    - Content-Security-Policy
+    - X-Content-Type-Options
+    - X-Frame-Options
+  end note
+  
+  :Log request (sanitized);
+  note right
+    Security Logging:
+    - No sensitive data
+    - Request metadata
+    - Response status
+    - Error tracking
+  end note
+}
+
+partition "User Browser" {
+  :Receive encrypted response;
+  :Display trip itinerary;
+  note right
+    **Continuous Security Monitoring:**
+    - Failed request tracking
+    - Rate limit violations  
+    - Unusual traffic patterns
+    - Error spike detection
+    - Automated security alerts
+  end note
+}
+
+stop
+
+legend right
+  |= **Security Principles** |
+  | 1. Defense in Depth - Multiple security layers |
+  | 2. Least Privilege - Minimal permissions |
+  | 3. Secure by Default - No opt-in security |
+  | 4. Zero Trust - Validate everything |
+  | 5. Fail Secure - Safe error handling |
+endlegend
+
+@enduml

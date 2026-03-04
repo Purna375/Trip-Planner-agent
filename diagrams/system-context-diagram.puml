@@ -1,0 +1,78 @@
+@startuml system-context-diagram
+' System Context Diagram for AI Trip Planner
+' Shows the system and its external actors/systems
+
+!define RECTANGLE class
+
+skinparam rectangle {
+    BackgroundColor<<system>> LightBlue
+    BackgroundColor<<external>> LightYellow
+    BackgroundColor<<user>> LightGreen
+    BorderColor Black
+    FontSize 12
+}
+
+skinparam arrow {
+    Color Black
+    FontSize 10
+}
+
+title AI Trip Planner System - Context Diagram
+
+rectangle "User" <<user>> as User {
+}
+
+rectangle "AI Trip Planner\nSystem" <<system>> as System {
+}
+
+rectangle "Groq API\n(LLM Service)" <<external>> as Groq {
+}
+
+rectangle "OpenStreetMap\n(Nominatim)" <<external>> as OSM {
+}
+
+rectangle "Open-Meteo\n(Weather)" <<external>> as Weather {
+}
+
+rectangle "Overpass API\n(POI Data)" <<external>> as Overpass {
+}
+
+rectangle "OpenRouteService\n(Routing)" <<external>> as ORS {
+}
+
+User --> System : "Submit trip\nrequirements"
+System --> User : "Return personalized\nitinerary"
+
+System --> Groq : "Send prompts\nfor AI generation"
+Groq --> System : "Return AI-generated\nresponses"
+
+System --> OSM : "Query location\ncoordinates"
+OSM --> System : "Return lat/lon\ndata"
+
+System --> Weather : "Request weather\nforecast"
+Weather --> System : "Return forecast\ndata"
+
+System --> Overpass : "Query points of\ninterest"
+Overpass --> System : "Return POI\nlist"
+
+System --> ORS : "Request route\ninformation"
+ORS --> System : "Return distance\nand duration"
+
+note right of System
+  **Core System Components:**
+  - FastAPI Backend
+  - LangChain Agent
+  - React Frontend
+  - API Integration Layer
+end note
+
+note bottom of User
+  **User Inputs:**
+  - Destination
+  - Travel dates
+  - Budget
+  - Interests
+  - Travel pace
+end note
+
+@enduml

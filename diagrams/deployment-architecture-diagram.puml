@@ -1,0 +1,175 @@
+@startuml deployment-architecture-diagram
+' Deployment Architecture Diagram
+' Shows deployment topology and infrastructure
+
+!define NODE node
+
+skinparam node {
+    BackgroundColor LightBlue
+    BorderColor Black
+    FontSize 10
+}
+
+skinparam cloud {
+    BackgroundColor LightYellow
+    BorderColor DarkGray
+}
+
+skinparam database {
+    BackgroundColor LightGreen
+    BorderColor Black
+}
+
+title AI Trip Planner - Deployment Architecture
+
+cloud "Internet" {
+}
+
+node "Client Machine" {
+    [Web Browser] as Browser
+    [HTML/CSS/JS\nFiles] as StaticFiles
+}
+
+node "Cloud Platform\n(AWS/Azure/GCP)" {
+    node "Load Balancer" as LB {
+        [Application\nLoad Balancer] as ALB
+    }
+    
+    node "Application Server 1" as AppServer1 {
+        [Docker Container 1] as Container1
+        [FastAPI App\nUvicorn Server] as App1
+        [Python 3.9+\nRuntime] as Runtime1
+    }
+    
+    node "Application Server 2" as AppServer2 {
+        [Docker Container 2] as Container2
+        [FastAPI App\nUvicorn Server] as App2
+        [Python 3.9+\nRuntime] as Runtime2
+    }
+    
+    node "Application Server N" as AppServerN {
+        [Docker Container N] as ContainerN
+        [FastAPI App\nUvicorn Server] as AppN
+        [Python 3.9+\nRuntime] as RuntimeN
+    }
+    
+    database "Environment\nVariables" as EnvVars {
+        [GROQ_API_KEY]
+        [OPENROUTE_API_KEY]
+        [Configuration\nSettings]
+    }
+    
+    node "CDN\n(Optional)" as CDN {
+        [Static File\nCache] as Cache
+    }
+    
+    node "Monitoring" as Monitor {
+        [Logs] as Logs
+        [Metrics] as Metrics
+        [Alerts] as Alerts
+    }
+}
+
+cloud "External Services" {
+    node "Groq API" as GroqCloud {
+        [Llama 3.1\nModels] as Groq
+    }
+    
+    node "OpenStreetMap" as OSMCloud {
+        [Nominatim\nAPI] as Nominatim
+        [Overpass\nAPI] as Overpass
+    }
+    
+    node "Weather Services" as WeatherCloud {
+        [Open-Meteo\nAPI] as OpenMeteo
+    }
+    
+    node "Routing Services" as RoutingCloud {
+        [OpenRouteService\nAPI] as ORS
+    }
+}
+
+' Client connections
+Browser --> "Internet" : HTTPS
+"Internet" --> ALB : HTTPS\n(Port 443)
+"Internet" --> CDN : HTTPS\n(Static files)
+CDN --> Browser : "Cached\nstatic files"
+
+' Load balancer to app servers
+ALB --> Container1 : HTTP\n(Port 8000)
+ALB --> Container2 : HTTP\n(Port 8000)
+ALB --> ContainerN : HTTP\n(Port 8000)
+
+' App servers using environment variables
+Container1 ..> EnvVars : "reads"
+Container2 ..> EnvVars : "reads"
+ContainerN ..> EnvVars : "reads"
+
+' App servers to external services
+App1 --> Groq : HTTPS
+App1 --> Nominatim : HTTPS
+App1 --> Overpass : HTTPS
+App1 --> OpenMeteo : HTTPS
+App1 --> ORS : HTTPS
+
+App2 --> Groq : HTTPS
+App2 --> Nominatim : HTTPS
+App2 --> Overpass : HTTPS
+App2 --> OpenMeteo : HTTPS
+App2 --> ORS : HTTPS
+
+' Monitoring connections
+Container1 --> Monitor : "Logs &\nMetrics"
+Container2 --> Monitor : "Logs &\nMetrics"
+ContainerN --> Monitor : "Logs &\nMetrics"
+
+note right of Browser
+  **Client Requirements:**
+  - Modern web browser
+  - JavaScript enabled
+  - Internet connection
+end note
+
+note bottom of LB
+  **Load Balancing:**
+  - Health checks: /api/health
+  - Round-robin distribution
+  - SSL termination
+  - Auto-scaling triggers
+end note
+
+note right of AppServer1
+  **Container Specs:**
+  - OS: Linux (Alpine/Ubuntu)
+  - Memory: 512MB - 2GB
+  - CPU: 1-2 cores
+  - Storage: 1GB
+  - Ephemeral (stateless)
+end note
+
+note left of EnvVars
+  **Secret Management:**
+  - AWS Secrets Manager
+  - Azure Key Vault
+  - GCP Secret Manager
+  - Never hardcoded
+end note
+
+note bottom of Monitor
+  **Monitoring Tools:**
+  - CloudWatch (AWS)
+  - Azure Monitor
+  - GCP Cloud Logging
+  - Prometheus + Grafana
+  - ELK Stack
+end note
+
+note right of "External Services"
+  **External Dependencies:**
+  - All connections over HTTPS
+  - Rate limiting compliance
+  - Retry logic with backoff
+  - Circuit breaker pattern
+end note
+
+@enduml

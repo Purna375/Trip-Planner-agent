@@ -1,0 +1,73 @@
+\babel@toc {english}{}\relax 
+\contentsline {chapter}{Document Information}{1}{chapter*.1}%
+\contentsline {chapter}{\numberline {1}Introduction}{3}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Purpose}{3}{section.1.1}%
+\contentsline {subsection}{\numberline {1.1.1}Target Audience}{3}{subsection.1.1.1}%
+\contentsline {section}{\numberline {1.2}Scope}{3}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}System Capabilities}{3}{subsection.1.2.1}%
+\contentsline {subsection}{\numberline {1.2.2}Technology Stack}{4}{subsection.1.2.2}%
+\contentsline {section}{\numberline {1.3}Definitions and Acronyms}{4}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Design Goals}{4}{section.1.4}%
+\contentsline {section}{\numberline {1.5}References}{5}{section.1.5}%
+\contentsline {chapter}{\numberline {2}System Overview}{6}{chapter.2}%
+\contentsline {section}{\numberline {2.1}System Context}{6}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}System Context Diagram}{6}{subsection.2.1.1}%
+\contentsline {section}{\numberline {2.2}High-Level Architecture}{7}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Architectural Layers}{7}{subsection.2.2.1}%
+\contentsline {section}{\numberline {2.3}Key Design Patterns}{9}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}ReAct Agent Pattern}{9}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Service Layer Pattern}{10}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Repository Pattern}{10}{subsection.2.3.3}%
+\contentsline {chapter}{\numberline {3}System Architecture}{11}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Architectural Style}{11}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Component Architecture}{11}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Frontend Components}{11}{subsection.3.2.1}%
+\contentsline {subsubsection}{index.html}{11}{subsection.3.2.1}%
+\contentsline {subsubsection}{app.js}{11}{subsection.3.2.1}%
+\contentsline {subsubsection}{api.js}{13}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Backend Components}{13}{subsection.3.2.2}%
+\contentsline {subsubsection}{main.py}{13}{subsection.3.2.2}%
+\contentsline {subsubsection}{routes/trip\_planner.py}{13}{lstnumber.3.2.23}%
+\contentsline {subsubsection}{services/trip\_service.py}{14}{lstnumber.3.3.24}%
+\contentsline {subsubsection}{agents/trip\_agent.py}{14}{lstnumber.3.4.28}%
+\contentsline {section}{\numberline {3.3}Data Flow Architecture}{15}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Deployment Architecture}{17}{section.3.4}%
+\contentsline {chapter}{\numberline {4}Data Design}{19}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Data Models Overview}{19}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Request Schemas}{20}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}TripRequest Model}{21}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Example Request}{21}{subsection.4.2.2}%
+\contentsline {section}{\numberline {4.3}Response Schemas}{21}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}TripResponse Model}{21}{subsection.4.3.1}%
+\contentsline {chapter}{\numberline {5}Interface Design}{23}{chapter.5}%
+\contentsline {section}{\numberline {5.1}User Interface Design}{23}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Design Principles}{23}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}UI Wireframe}{23}{subsection.5.1.2}%
+\contentsline {section}{\numberline {5.2}API Interface Design}{25}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}REST API Endpoints}{25}{subsection.5.2.1}%
+\contentsline {chapter}{\numberline {6}Security Design}{26}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Security Architecture}{26}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Authentication and Authorization}{27}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}Current State}{27}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}Future Enhancements}{27}{subsection.6.2.2}%
+\contentsline {section}{\numberline {6.3}Data Security}{28}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Input Validation}{28}{subsection.6.3.1}%
+\contentsline {chapter}{Summary}{29}{chapter*.15}%
+\contentsline {chapter}{\numberline {A}PlantUML Diagram Generation Guide}{30}{appendix.A}%
+\contentsline {section}{\numberline {A.1}Prerequisites}{30}{section.A.1}%
+\contentsline {section}{\numberline {A.2}Document Compilation}{30}{section.A.2}%
+\contentsline {subsection}{\numberline {A.2.1}Standard Compilation (Without Diagrams)}{30}{subsection.A.2.1}%
+\contentsline {subsection}{\numberline {A.2.2}Alternative: Using latexmk}{31}{subsection.A.2.2}%
+\contentsline {section}{\numberline {A.3}Generating Diagram Images}{31}{section.A.3}%
+\contentsline {subsection}{\numberline {A.3.1}Step 1: Extract PlantUML Code}{31}{subsection.A.3.1}%
+\contentsline {subsection}{\numberline {A.3.2}Step 2: Generate PNG Images}{31}{subsection.A.3.2}%
+\contentsline {subsection}{\numberline {A.3.3}Step 3: View Diagrams}{31}{subsection.A.3.3}%
+\contentsline {section}{\numberline {A.4}Troubleshooting}{32}{section.A.4}%
+\contentsline {subsection}{\numberline {A.4.1}Error: Java not found}{32}{subsection.A.4.1}%
+\contentsline {subsection}{\numberline {A.4.2}Error: Cannot find plantuml.jar}{32}{subsection.A.4.2}%
+\contentsline {subsection}{\numberline {A.4.3}Diagram Layout Issues}{32}{subsection.A.4.3}%
+\contentsline {section}{\numberline {A.5}Advanced: Integrating Diagrams into LaTeX}{32}{section.A.5}%
+\contentsline {subsection}{\numberline {A.5.1}Option 1: Manual Replacement}{32}{subsection.A.5.1}%
+\contentsline {subsection}{\numberline {A.5.2}Option 2: Automated with Makefile}{33}{subsection.A.5.2}%
+\contentsline {section}{\numberline {A.6}Tips for Best Results}{33}{section.A.6}%
+\contentsline {chapter}{Document Approval}{34}{appendix*.16}%

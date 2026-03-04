@@ -1,0 +1,187 @@
+@startuml ui-wireframe
+' UI Wireframe for Trip Planner Interface
+' Shows the main user interface layout
+
+!theme plain
+
+skinparam rectangle {
+    BackgroundColor WhiteSmoke
+    BorderColor Black
+    FontSize 10
+}
+
+title AI Trip Planner - User Interface Wireframe
+
+rectangle "Browser Window" {
+    rectangle "Header Section" #LightBlue {
+        [🧳 AI Trip Planner]
+        [AI-Powered Travel Planning]
+    }
+    
+    rectangle "Main Content Area" {
+        ' Input Section
+        rectangle "Input Section (id: inputSection)" #LightGreen {
+            rectangle "Trip Planning Form" {
+                [📍 Destination]
+                [e.g., Paris, France]
+                note right: Text input (required)
+                
+                [📅 Start Date]
+                [YYYY-MM-DD]
+                note right: Date picker
+                
+                [📅 End Date]
+                [YYYY-MM-DD]
+                note right: Date picker
+                
+                [💰 Budget (USD)]
+                [e.g., 1500]
+                note right: Number input (min: 100)
+                
+                [👥 Number of Travelers]
+                [e.g., 2]
+                note right: Number input (1-20)
+                
+                [🎯 Interests]
+                [☐ Culture & History]
+                [☐ Food & Cuisine]
+                [☐ Museums & Art]
+                [☐ Nature & Outdoors]
+                [☐ Adventure]
+                [☐ Shopping]
+                [☐ Nightlife]
+                [☐ Local Life]
+                note right: Checkboxes (multi-select)
+                
+                [⚡ Travel Pace]
+                [○ Relaxed]
+                [○ Balanced]
+                [○ Packed]
+                note right: Radio buttons (single select)
+                
+                rectangle "Submit Button" #DodgerBlue {
+                    [✈️ Plan My Trip]
+                }
+            }
+        }
+        
+        ' Loading Section
+        rectangle "Loading Section (id: loadingSection)" #LightYellow {
+            [⏳ Loading Animation]
+            [Spinner/Progress Bar]
+            
+            [Status Messages:]
+            ["Analyzing your preferences..."]
+            ["Checking weather conditions..."]
+            ["Finding the best attractions..."]
+            ["Optimizing your itinerary..."]
+            
+            note right
+              Animated progress:
+              0% → 25% → 50% → 75% → 100%
+            end note
+        }
+        
+        ' Results Section
+        rectangle "Results Section (id: resultsSection)" #LightCyan {
+            rectangle "Trip Overview Card" #White {
+                [📍 Paris, France]
+                [📅 June 15-18, 2026 (4 days)]
+                [💰 $1,500 total ($375/day)]
+                [👥 2 travelers]
+                [🌤️ Mostly sunny, 20-24°C]
+            }
+            
+            rectangle "Daily Itinerary Container" {
+                rectangle "Day 1 Card" #AliceBlue {
+                    [Day 1 - June 15, 2026]
+                    [🌤️ Sunny, 23°C]
+                    
+                    [🌅 MORNING (9:00 AM - 12:00 PM)]
+                    [Eiffel Tower Visit]
+                    [Description: Iconic iron lattice tower...]
+                    [⏱️ 3 hours | 💰 $25.00]
+                    
+                    [🌞 AFTERNOON (2:00 PM - 5:00 PM)]
+                    [Louvre Museum]
+                    [Description: World's largest art museum...]
+                    [⏱️ 3 hours | 💰 $18.00]
+                    
+                    [🌆 EVENING (7:00 PM - 10:00 PM)]
+                    [Seine River Cruise]
+                    [Description: Romantic evening cruise...]
+                    [⏱️ 3 hours | 💰 $85.00]
+                    
+                    [💵 Daily Total: $128.00]
+                }
+                
+                [Day 2 Card...]
+                [Day 3 Card...]
+                [Day 4 Card...]
+            }
+            
+            rectangle "Smart Recommendations" {
+                rectangle "Packing List" #Honeydew {
+                    [🎒 Packing List]
+                    [• Sunscreen]
+                    [• Comfortable shoes]
+                    [• Light jacket]
+                    [• Camera]
+                    [• Travel adapter]
+                }
+                
+                rectangle "Weather Tips" #Honeydew {
+                    [🌤️ Weather Tips]
+                    [• Sunny weather expected]
+                    [• Bring light jacket for evenings]
+                    [• Stay hydrated]
+                }
+                
+                rectangle "Local Tips" #Honeydew {
+                    [💡 Local Tips]
+                    [• Book tickets in advance]
+                    [• Learn basic French phrases]
+                    [• Use metro for transport]
+                }
+            }
+            
+            rectangle "Action Buttons" #LightSteelBlue {
+                [📥 Download Itinerary]
+                [🔄 Plan Another Trip]
+            }
+        }
+        
+        ' Error Section
+        rectangle "Error Section (id: errorSection)" #LightCoral {
+            [❌ Error Banner]
+            [Error Message Text]
+            [Detailed error description]
+            
+            rectangle "Retry Button" #Tomato {
+                [🔄 Try Again]
+            }
+        }
+    }
+    
+    rectangle "Footer Section" #LightGray {
+        [© 2026 AI Trip Planner]
+        [Privacy | Terms | Contact]
+    }
+}
+
+note bottom of "Browser Window"
+  **Responsive Design:**
+  - Mobile: 320px+
+  - Tablet: 768px+
+  - Desktop: 1024px+
+  
+  **UI States:**
+  1. Input (default)
+  2. Loading (processing)
+  3. Results (success)
+  4. Error (failure)
+  
+  Only one section visible at a time
+end note
+
+@enduml

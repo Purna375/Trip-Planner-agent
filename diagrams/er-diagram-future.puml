@@ -1,0 +1,185 @@
+@startuml er-diagram-future
+' Entity-Relationship Diagram (Future Database Schema)
+' For when persistent storage is added
+
+!theme plain
+
+skinparam entity {
+    BackgroundColor LightBlue
+    BorderColor Black
+    FontSize 10
+}
+
+title AI Trip Planner - Database Schema (Future Enhancement)
+
+entity "users" {
+    * id : UUID <<PK>>
+    --
+    * email : VARCHAR(255) <<UNIQUE>>
+    * password_hash : VARCHAR(255)
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+    last_login : TIMESTAMP
+    is_active : BOOLEAN
+}
+
+entity "trips" {
+    * id : UUID <<PK>>
+    * user_id : UUID <<FK>>
+    --
+    * destination : VARCHAR(255)
+    * start_date : DATE
+    * end_date : DATE
+    * budget : DECIMAL(10,2)
+    * travelers : INTEGER
+    * pace : VARCHAR(20)
+    * status : VARCHAR(20)
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+entity "trip_interests" {
+    * trip_id : UUID <<FK>>
+    * interest : VARCHAR(50)
+    --
+    <<Composite PK: trip_id, interest>>
+}
+
+entity "itineraries" {
+    * id : UUID <<PK>>
+    * trip_id : UUID <<FK>>
+    --
+    * itinerary_data : JSONB
+    * created_at : TIMESTAMP
+    version : INTEGER
+}
+
+entity "daily_itinerary" {
+    * id : UUID <<PK>>
+    * itinerary_id : UUID <<FK>>
+    --
+    * day_number : INTEGER
+    * date : DATE
+    * weather : VARCHAR(100)
+    * total_cost : DECIMAL(10,2)
+    * travel_time : VARCHAR(50)
+    * notes : TEXT
+}
+
+entity "activities" {
+    * id : UUID <<PK>>
+    * daily_itinerary_id : UUID <<FK>>
+    --
+    * name : VARCHAR(255)
+    * description : TEXT
+    * time_of_day : VARCHAR(20)
+    * duration : VARCHAR(50)
+    * estimated_cost : DECIMAL(10,2)
+    * location : VARCHAR(255)
+    * coordinates : POINT
+    * order_index : INTEGER
+}
+
+entity "favorites" {
+    * id : UUID <<PK>>
+    * user_id : UUID <<FK>>
+    * trip_id : UUID <<FK>>
+    --
+    * created_at : TIMESTAMP
+    <<Unique: user_id, trip_id>>
+}
+
+entity "api_cache" {
+    * key : VARCHAR(255) <<PK>>
+    --
+    * value : JSONB
+    * created_at : TIMESTAMP
+    * expires_at : TIMESTAMP
+}
+
+entity "user_preferences" {
+    * id : UUID <<PK>>
+    * user_id : UUID <<FK>>
+    --
+    default_interests : JSONB
+    default_pace : VARCHAR(20)
+    currency : VARCHAR(3)
+    language : VARCHAR(10)
+}
+
+entity "feedback" {
+    * id : UUID <<PK>>
+    * user_id : UUID <<FK>>
+    * trip_id : UUID <<FK>>
+    --
+    * rating : INTEGER
+    * comment : TEXT
+    * created_at : TIMESTAMP
+}
+
+' Relationships
+users ||--o{ trips : "creates"
+users ||--o{ favorites : "has"
+users ||--o{ user_preferences : "has"
+users ||--o{ feedback : "submits"
+
+trips ||--o{ trip_interests : "has"
+trips ||--|| itineraries : "has"
+trips ||--o{ favorites : "favorited by"
+trips ||--o{ feedback : "receives"
+
+itineraries ||--o{ daily_itinerary : "contains"
+
+daily_itinerary ||--o{ activities : "includes"
+
+note right of users
+  **User Management:**
+  - Authentication & authorization
+  - Email verification
+  - Password reset
+  - Activity tracking
+end note
+
+note right of trips
+  **Trip Storage:**
+  - Complete trip parameters
+  - Version history
+  - Status tracking:
+    * draft
+    * completed
+    * archived
+end note
+
+note right of itineraries
+  **Itinerary Versioning:**
+  - Store complete JSON
+  - Track modifications
+  - Enable rollback
+  - Compare versions
+end note
+
+note bottom of api_cache
+  **Performance Caching:**
+  - Geocoding results
+  - Weather forecasts (1h TTL)
+  - POI data (24h TTL)
+  - Reduce external API calls
+end note
+
+note bottom of user_preferences
+  **Personalization:**
+  - Default trip settings
+  - Preferred currencies
+  - UI language
+  - Notification preferences
+end note
+
+note right of feedback
+  **Analytics:**
+  - Trip ratings (1-5)
+  - User comments
+  - Improvement insights
+  - Quality metrics
+end note
+
+@enduml

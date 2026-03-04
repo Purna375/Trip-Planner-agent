@@ -1,0 +1,98 @@
+@startuml high-level-architecture-diagram
+' High-Level Architecture Diagram
+' Shows three-tier architecture
+
+!define RECTANGLE class
+
+skinparam rectangle {
+    BackgroundColor<<frontend>> LightGreen
+    BackgroundColor<<backend>> LightBlue
+    BackgroundColor<<external>> LightYellow
+    BorderColor Black
+    FontSize 11
+}
+
+title AI Trip Planner - High-Level Architecture
+
+package "Presentation Layer" <<frontend>> {
+    rectangle "Web Browser" {
+        rectangle "HTML5\n(Structure)" as HTML
+        rectangle "CSS3\n(Styling)" as CSS
+        rectangle "JavaScript\n(Logic)" as JS
+    }
+}
+
+package "Application Layer" <<backend>> {
+    rectangle "FastAPI Server" {
+        rectangle "REST API\nEndpoints" as API
+        rectangle "Request\nValidation" as Validation
+        rectangle "Response\nFormatting" as Formatting
+    }
+    
+    rectangle "Business Logic" {
+        rectangle "Trip Service\n(Orchestration)" as TripService
+        rectangle "API Service\n(Integration)" as APIService
+    }
+    
+    rectangle "AI Agent System" {
+        rectangle "LangChain\nAgent" as Agent
+        rectangle "Tool\nDefinitions" as Tools
+        rectangle "Prompt\nEngineering" as Prompts
+    }
+}
+
+package "Data Layer" <<external>> {
+    rectangle "Groq API\n(Llama 3.1)" as Groq
+    rectangle "OpenStreetMap\n(Geocoding)" as OSM
+    rectangle "Open-Meteo\n(Weather)" as Weather
+    rectangle "Overpass API\n(POI)" as Overpass
+    rectangle "OpenRouteService\n(Routing)" as ORS
+}
+
+' Connections between layers
+HTML --> JS : "User\ninteractions"
+CSS --> HTML : "Styling"
+JS --> API : "HTTPS/JSON\nAPI calls"
+
+API --> Validation : "Validate\nrequest"
+Validation --> TripService : "Valid\nrequest"
+TripService --> APIService : "Fetch external\ndata"
+TripService --> Agent : "Generate\nitinerary"
+Agent --> Tools : "Use tools"
+
+APIService --> Groq : "LLM\nrequests"
+APIService --> OSM : "Geocoding"
+APIService --> Weather : "Forecast"
+APIService --> Overpass : "POI query"
+APIService --> ORS : "Route info"
+
+Agent --> Formatting : "Raw\nitinerary"
+Formatting --> API : "Formatted\nresponse"
+API --> JS : "JSON\nresponse"
+
+note right of "Presentation Layer"
+  **Frontend Technologies:**
+  - Single Page Application
+  - Responsive Design
+  - Client-side validation
+  - State management
+end note
+
+note right of "Application Layer"
+  **Backend Technologies:**
+  - Python 3.9+
+  - FastAPI framework
+  - LangChain for agents
+  - Pydantic validation
+  - Async/await patterns
+end note
+
+note right of "Data Layer"
+  **External Services:**
+  - All HTTPS connections
+  - Rate limiting compliance
+  - Error handling & retries
+  - Optional caching
+end note
+
+@enduml

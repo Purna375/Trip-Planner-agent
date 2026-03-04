@@ -1,0 +1,147 @@
+@startuml component-architecture-diagram
+' Detailed Component Architecture Diagram
+' Shows all system components and their relationships
+
+!define COMPONENT rectangle
+
+skinparam component {
+    BackgroundColor LightBlue
+    BorderColor Black
+    FontSize 10
+}
+
+skinparam package {
+    BackgroundColor WhiteSmoke
+    BorderColor DarkGray
+    FontSize 11
+}
+
+title AI Trip Planner - Component Architecture
+
+package "Frontend" {
+    [index.html] as HTML
+    [styles.css] as CSS
+    [app.js] as AppJS
+    [api.js] as ApiJS
+    
+    HTML --> AppJS : "includes"
+    HTML --> CSS : "styles"
+    AppJS --> ApiJS : "uses"
+}
+
+package "Backend - main.py" {
+    [FastAPI App] as App
+    [CORS Middleware] as CORS
+    [Exception Handler] as ExHandler
+    [Startup Events] as Startup
+    
+    App --> CORS : "configures"
+    App --> ExHandler : "registers"
+    App --> Startup : "runs"
+}
+
+package "Backend - routes/" {
+    [trip_planner.py] as Routes
+    [/api/plan-trip] as PlanTrip
+    [/api/health] as Health
+    [/api/sample-*] as Sample
+    
+    Routes --> PlanTrip : "defines"
+    Routes --> Health : "defines"
+    Routes --> Sample : "defines"
+}
+
+package "Backend - services/" {
+    [trip_service.py] as TripService
+    [api_service.py] as APIService
+    
+    TripService --> APIService : "uses"
+}
+
+package "Backend - agents/" {
+    [trip_agent.py] as TripAgent
+    [tools.py] as Tools
+    
+    TripAgent --> Tools : "registers"
+}
+
+package "Backend - models/" {
+    [schemas.py] as Schemas
+    [TripRequest] as TripReq
+    [TripResponse] as TripResp
+    [Activity] as Activity
+    [DayItinerary] as DayItin
+    
+    Schemas --> TripReq : "defines"
+    Schemas --> TripResp : "defines"
+    Schemas --> Activity : "defines"
+    Schemas --> DayItin : "defines"
+}
+
+package "Backend - utils/" {
+    [config.py] as Config
+    [helpers.py] as Helpers
+}
+
+package "External APIs" {
+    [Groq API] as Groq
+    [Nominatim] as Nominatim
+    [Open-Meteo] as OpenMeteo
+    [Overpass API] as Overpass
+    [OpenRouteService] as ORS
+}
+
+' Frontend to Backend connections
+ApiJS --> App : "HTTP/JSON"
+App --> Routes : "routes to"
+
+' Route to Service connections
+PlanTrip --> TripService : "calls"
+PlanTrip --> Schemas : "validates with"
+
+' Service interactions
+TripService --> TripAgent : "invokes"
+TripService --> APIService : "calls"
+TripService --> Helpers : "uses"
+TripAgent --> Config : "reads"
+APIService --> Config : "reads"
+
+' External API connections
+APIService --> Groq : "HTTPS"
+APIService --> Nominatim : "HTTPS"
+APIService --> OpenMeteo : "HTTPS"
+APIService --> Overpass : "HTTPS"
+APIService --> ORS : "HTTPS"
+Tools --> APIService : "wraps"
+
+note right of "Frontend"
+  **Frontend Components:**
+  - HTML: Structure & forms
+  - CSS: Responsive styling
+  - app.js: State management
+  - api.js: HTTP client
+end note
+
+note right of "Backend - main.py"
+  **Application Setup:**
+  - FastAPI initialization
+  - Middleware configuration
+  - Global error handling
+  - Health checks
+end note
+
+note right of "Backend - services/"
+  **Service Layer:**
+  - trip_service: Orchestration
+  - api_service: External APIs
+  - Business logic separation
+end note
+
+note bottom of "Backend - agents/"
+  **AI Agent System:**
+  - LangChain ReAct pattern
+  - Tool registration
+  - Agent execution
+end note
+
+@enduml

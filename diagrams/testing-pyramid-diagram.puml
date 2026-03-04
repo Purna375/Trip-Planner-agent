@@ -1,0 +1,85 @@
+@startuml testing-pyramid-diagram
+
+title AI Trip Planner - Testing Pyramid Strategy
+
+skinparam packageStyle rectangle
+skinparam package {
+    BackgroundColor LightBlue
+    BorderColor Black
+    FontSize 12
+}
+
+package "E2E Tests (5%)" #LightYellow {
+}
+
+package "          Integration Tests (15%)          " #LightGreen {
+}
+
+package "                    Unit Tests (80%)                    " #LightBlue {
+}
+
+note right of "E2E Tests (5%)"
+  **End-to-End Testing**
+  ----
+  • Full user journey tests
+  • Browser automation
+  • API integration tests
+  • Slowest, most expensive
+  • Run before deployment
+  
+  **Execution Time:** 5-10 minutes
+  **Examples:**
+  • Complete trip planning flow
+  • User submits request → receives itinerary
+end note
+
+note right of "          Integration Tests (15%)          "
+  **Integration Testing**
+  ----
+  • API endpoint tests
+  • Service interaction tests
+  • Database integration
+  • External API mocking
+  • Medium speed
+  
+  **Execution Time:** 1-2 minutes
+  **Examples:**
+  • POST /api/plan-trip endpoint
+  • Agent + Tool integration
+  • External API responses
+end note
+
+note right of "                    Unit Tests (80%)                    "
+  **Unit Testing**
+  ----
+  • Individual function tests
+  • Component isolation
+  • Fast execution
+  • High coverage
+  • Run on every commit
+  
+  **Execution Time:** 10-30 seconds
+  **Examples:**
+  • Agent reasoning logic
+  • Tool functions (geocoding, weather)
+  • Pydantic model validation
+  • Helper utilities
+end note
+
+legend bottom
+  **Testing Strategy Benefits:**
+  
+  1. **Fast Feedback** - Most tests run in seconds
+  2. **Low Cost** - Unit tests are cheap to maintain
+  3. **High Coverage** - 80% of code tested at unit level
+  4. **Reliable** - Isolated tests = fewer flaky tests
+  5. **Scalable** - Pyramid structure scales well
+  
+  **Test Distribution:**
+  • Unit Tests: ~80 tests (80%)
+  • Integration Tests: ~15 tests (15%)
+  • E2E Tests: ~5 tests (5%)
+  • Total: ~100 tests
+endlegend
+
+@enduml

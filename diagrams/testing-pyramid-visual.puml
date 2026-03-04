@@ -1,0 +1,85 @@
+@startuml testing-pyramid-visual
+
+title AI Trip Planner - Testing Pyramid Strategy
+
+skinparam componentStyle rectangle
+skinparam component {
+    BackgroundColor LightBlue
+    BorderColor Black
+}
+
+package "Testing Strategy" {
+  
+  component "        E2E Tests (5%)        " as E2E #LightYellow [
+    End-to-End Testing
+    ----
+    • Full user workflows
+    • Browser automation  
+    • Complete API flow
+    • Slowest execution
+    • Run before deploy
+  ]
+  
+  component "                Integration Tests (15%)                " as Integration #LightGreen [
+    Integration Testing
+    ----
+    • API endpoint tests
+    • Service interactions
+    • External API mocking
+    • Database integration
+    • Medium execution speed
+  ]
+  
+  component "                                Unit Tests (80%)                                " as Unit #LightBlue [
+    Unit Testing
+    ----
+    • Individual functions
+    • Component isolation
+    • Fast execution
+    • High code coverage
+    • Run on every commit
+    • TDD friendly
+  ]
+  
+}
+
+E2E -[hidden]down-> Integration
+Integration -[hidden]down-> Unit
+
+note right of E2E
+  **Execution Time:** 5-10 min
+  **Cost:** High
+  **Maintenance:** High
+end note
+
+note right of Integration
+  **Execution Time:** 1-2 min
+  **Cost:** Medium
+  **Maintenance:** Medium
+end note
+
+note right of Unit
+  **Execution Time:** 10-30 sec
+  **Cost:** Low
+  **Maintenance:** Low
+end note
+
+legend bottom left
+  **Why Pyramid Shape?**
+  • More unit tests = faster feedback
+  • Fewer E2E tests = lower cost
+  • Better test isolation at base
+  • Optimal coverage/speed ratio
+  
+  **For AI Trip Planner:**
+  • ~80 unit tests (agents, tools, services)
+  • ~15 integration tests (API endpoints)
+  • ~5 E2E tests (complete trip planning)
+endlegend
+
+note top
+  **Total Tests: 100**
+  Unit: 80 | Integration: 15 | E2E: 5
+end note
+
+@enduml
